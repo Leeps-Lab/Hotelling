@@ -1,0 +1,11 @@
+period,paid,length,subperiods,percentChangePerSecond,groupSize,payoffFunction,source,min,max,strategies,params,mixed,selector,potential
+1,FALSE,20,0,0.1,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+2,FALSE,60,6,NaN,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+3,TRUE,500,50,NaN,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+4,TRUE,600,120,NaN,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+5,TRUE,120,0,NaN,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+6,TRUE,180,0,0.01,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+7,TRUE,120,0,0.1,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,FALSE
+8,TRUE,120,0,NaN,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,TRUE
+9,TRUE,180,0,0.01,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,TRUE
+10,TRUE,120,0,0.1,4,script,Hotelling.java,0,100,1,"Alpha=1,Beta=0.5,Gamma=0.1",TRUE,bubbles,TRUE
