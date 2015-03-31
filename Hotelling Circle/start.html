@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Hotelling</title>
+    
+    <link href="{{ STATIC_URL}}css/bootstrap.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}js/jquery.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/redwood.js"></script>
+   
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}flot/jquery.flot.time.js"></script>
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}flot/jquery.flot.selection.js"></script>
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}d3/d3.v3.min.js"></script>
+    <script type="text/javascript">
+      {{ js }}
+    </script>
+    <style type="text/css">
+      {{ css }}
+    </style>
+  </head>
+  <body>
+  
+  <div id="content" style="padding-left:25px; padding-top:25px">
+  
+  <div class="well" style="width:900px">
+  
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  
+    <div class="modal-dialog">
+      <div class="modal-content">
+      </div>
+    </div>
+  </div>
+  
+  <table>
+  <tr>
+
+    <td><h4 style="width:250px">Economics Experiment</h4></td>
+
+    <td><h4 id = "subj"   style="width:135px">Subject</h4></td>
+    <td><h4 id = "period" style="width:80px"></h4></td>
+    <td><h4 id = "paid"   style="width:165px"></h4></td>
+    <td><h4 id="curr_score"></h4></td>
+  </tr>
+  
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td><h4 id="time"></h4></td>
+  </tr>
+    
+  <tr>
+    <td>
+      <div class="progress" id = "prog">
+        <div class="bar" style="width: 0%;"></div>
+      </div>
+    </td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td><h4 id = "total_score" style="visibility:hidden">Total Score: </h4></td>
+  </tr>
+
+  </table>
+  </div>
+  
+  <h3 id="color">Your color</h3>
+  <p id="x_ref"></p>
+  <p id="y_ref"></p> 
+  <p id="x_loc"></p>
+  <p id="test"></p>
+  <h2 id="select" style="color:red"></h2>
+  <table>
+    <tr>
+    <td><div class="demo-container" >
+        <svg width="450" height="450" id="actionSpace">
+          <circle id="actionCircle" cx="225" cy="225" r="200"></circle>
+          <circle cx="225" cy="225" r="50" style="fill:black;"></circle>
+        </svg>
+    </div></td>
+    <td style="padding-left: 20px"><div class="demo-container" >
+       <div id="placeholder2" style="height:450px; width:450px" class="demo-placeholder">  </div>
+    </div></td>
+    </tr>
+  </table>
+  
+  </div>
+  </body>
+</html>
