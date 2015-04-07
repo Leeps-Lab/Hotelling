@@ -72,6 +72,7 @@ var payoff_mirror = 0;
 var im_allowed = false;
 var pick_order = [];
 var numerical_id = -1;
+var chosenx = 0;
 
 /*
 * returns color associated with a player
@@ -806,75 +807,52 @@ $(function() {
   }); 
   $("#myModal").modal('show');
   
-  
-  //plot 1 on click event handler
-  $("#placeholder").bind("plotclick", function (event, pos, item) {
-    if(game_type == "stage"){
-      if(allow_x) new_loc = pos.x.toFixed(3);
-      else if(allow_y) new_pos = pos.y.toFixed(3);
-    } else {
-      new_loc = pos.x.toFixed(3);
-      new_pos = pos.y.toFixed(3);
-    }
-    
-    if(new_loc > 1) new_loc = 1;
-    else if(new_loc < 0) new_loc = 0;
-    
-    if(new_pos > 1) new_pos = 1;
-    if(new_pos < 0) new_pos = 0;
-    
-    //iters no longer used..
-    var iterx = 0;
-    var itery = 0;
-    target_pos = [Number(new_loc), Number(new_pos)];
-    
-    if(game_type == "simultaneous" || game_type == "stage"){
-      //my_pos = [[new_loc, new_pos]];
-    } else if(game_type == "continuous"){
-      if(x_rate === 0) r.send("update_loc", { new_loc:new_loc , id:id, iterx:iterx });
-      if(y_rate === 0) r.send("update_pos", { new_pos:new_pos , id:id, itery:itery });
-
-      r.send("update_target", { new_loc:new_loc , new_pos:new_pos , id:id });
-       
-      sort_players();        
-      find_intersect_pts();
-      var index = get_index_by_id(id);
-      
-      //r.send("update_bounds", { index:index, new_lo_bound:new_lo_bound, new_hi_bound:new_hi_bound } );
-      
-      var pay = payoff(index);
-      r.send("update_payoff", { pay:pay, index:index });
-    }
-
-    update_plot();
-  });
 
 
-  //plot 1 on hover event handler for drawing crosshairs
-  $("#placeholder").bind("plothover", function (event, pos, item){
-    var a, b;
-    
-    if(game_type == "stage"){
-      if(allow_x && !allow_y){
-        a = pos.x.toFixed(3);
-      } 
-      else if(!allow_x && allow_y){
-        b = pos.y.toFixed(3);
-      }
-    } else {
-      a = pos.x.toFixed(3);
-      b = pos.y.toFixed(3);
-    }
-    
-    mouse = [a,b];
-    
-    intersects[num_of_players + 1] = a;
-    
-    options.xaxis.ticks = intersects;
-    options.yaxis.ticks = [0,b,1.5];
-  });
   
   function enablePlot() {
+      //plot 1 on click event handler
+    $("#placeholder").bind("plotclick", function (event, pos, item) {
+      if(game_type == "stage"){
+        if(allow_x) new_loc = pos.x.toFixed(3);
+        else if(allow_y) new_pos = pos.y.toFixed(3);
+      } else {
+        new_loc = pos.x.toFixed(3);
+        new_pos = pos.y.toFixed(3);
+      }
+      
+      if(new_loc > 1) new_loc = 1;
+      else if(new_loc < 0) new_loc = 0;
+      
+      if(new_pos > 1) new_pos = 1;
+      if(new_pos < 0) new_pos = 0;
+      
+      //iters no longer used..
+      var iterx = 0;
+      var itery = 0;
+      target_pos = [Number(new_loc), Number(new_pos)];
+      
+      if(game_type == "simultaneous" || game_type == "stage"){
+        //my_pos = [[new_loc, new_pos]];
+      } else if(game_type == "continuous"){
+        if(x_rate === 0) r.send("update_loc", { new_loc:new_loc , id:id, iterx:iterx });
+        if(y_rate === 0) r.send("update_pos", { new_pos:new_pos , id:id, itery:itery });
+
+        r.send("update_target", { new_loc:new_loc , new_pos:new_pos , id:id });
+         
+        sort_players();        
+        find_intersect_pts();
+        var index = get_index_by_id(id);
+        
+        //r.send("update_bounds", { index:index, new_lo_bound:new_lo_bound, new_hi_bound:new_hi_bound } );
+        
+        var pay = payoff(index);
+        r.send("update_payoff", { pay:pay, index:index });
+      }
+
+      update_plot();
+    });
+
     //plot 1 on hover event handler for drawing crosshairs
     $("#placeholder").bind("plothover", function (event, pos, item){
       var a, b;
@@ -902,9 +880,9 @@ $(function() {
 
   function disablePlot() {
     //plot 1 on hover event handler for drawing crosshairs
-    $("#placeholder").bind("plothover", function (event, pos, item){
-
-    });
+    $("#placeholder").off('hover');
+    $("#placeholder").unbind("plothover");
+    $("#placeholder").unbind("plotclick");
     mouse = [-1, -1];
   }
 
@@ -941,7 +919,7 @@ $(function() {
     }
     
     //update progress bar
-    if(game_type == "stage") $('.bar').width(((250/(period_length/subperiods))*time)%250);
+    if(game_type == "stage" || game_type == "dttb") $('.bar').width(((250/(period_length/subperiods))*time)%250);
     else $('.bar').width((250/period_length)*time);
     
     if(id == keeper) r.send("sync_time", { time:time } );
@@ -1035,12 +1013,13 @@ $(function() {
           r.send("set_payoffs", { curr_subperiods:curr_subperiods, id:id });
         }
       }
+    //discrete time turn based
     } else if (game_type == "dttb") {
 
       if (im_allowed) {
         enablePlot();
-        if(allow_x && !allow_y) document.getElementById("select").innerHTML = "Choose x";
-        else if(!allow_x && allow_y) document.getElementById("select").innerHTML = "Choose y";
+        if(allow_x) $("#select").html("Choose x");
+        else if(allow_y) $("#select").html("Choose y");
         
         if(allow_x && !flag){ //reset price at beginning of new subgame and keep old location
           //new_pos = 0;
@@ -1053,61 +1032,70 @@ $(function() {
         document.getElementById("select").innerHTML = "Please wait until your turn!";
         disablePlot();
       }
-        if(time % (period_length/subperiods) < 1) { //at the end of every subperiod update new position on plot
-          console.log("ENDING SUBPERIOD");
-          curr_i += 4;
-          var iterx = 0;
-          var itery = 0;
-          var offset = 1/num_of_players;
-          
-          if(allow_x && im_allowed){
-           
-            r.send("update_loc", { new_loc:new_loc , id:id, iterx:iterx });
-            allow_x = 0;
-            allow_y = 1; //switch to price subrounds
-            
 
-          } else if(allow_y && im_allowed){
-            r.send("update_pos", { new_pos:new_pos , id:id, itery:itery });
-
-            ++curr_sub_y;
-                
-            if(curr_sub_y == price_subrounds) { //when we reach the last price subround, start a new subgame
-              if(id == keeper) r.send("set_payoffs", { curr_subperiods:curr_subperiods, id:id });
-              sub_pay[0][curr_subperiods - 1] = payoff(0).toFixed(3);
-              sub_pay[1][curr_subperiods - 1] = payoff(1).toFixed(3);
-
-              allow_x = 1;
-              allow_y = 0;
-
-              if(id == keeper) r.send("update_subsetting", { allow_x:allow_x , allow_y:allow_y, curr_sub_y:curr_sub_y });
-              
-            }
-            
-            if(curr_sub_y == 2){
-              sub_pay[0].shift();
-              sub_pay[1].shift();
-            } 
-          }
-
-          if(id == keeper) r.send("new_subperiod", { curr_subperiods:curr_subperiods });
-
-          //discrete time turn based
-          pick_order = pick_order.reverse();
-          im_allowed = (numerical_id == pick_order[0]);
-          console.log("allowed= " + im_allowed);
-
-          if(curr_subperiods == subperiods){ //when we go through all subperiods, it's time for a new period
-            sub_pay[0][curr_subperiods - 1] = payoff(0).toFixed(3);
-            sub_pay[1][curr_subperiods - 1] = payoff(1).toFixed(3);
-            if(id == keeper) r.send("new_period", { current_period:current_period });
-          }  
-
-          if(id == keeper){
-            r.send("update_subsetting", { allow_x:allow_x , allow_y:allow_y, curr_sub_y:curr_sub_y });
-            r.send("set_payoffs", { curr_subperiods:curr_subperiods, id:id });
+      if(time % (period_length/subperiods) < 1) { 
+      //at the end of every subperiod update new position on plot
+        console.log("ENDING SUBPERIOD");
+        curr_i += 4;
+        var iterx = 0;
+        var itery = 0;
+        var offset = 1/num_of_players;
+        
+        //after two people have chosen x, let's switch to y
+        if (allow_x) {
+          chosenx++;
+          if (chosenx == 2) {
+            allow_x = 0; // disable x rounds and 
+            allow_y = 1; // switch to price subrounds
+            chosenx = 0;
           }
         }
+
+        if(allow_x && im_allowed){
+          r.send("update_loc", { new_loc:new_loc , id:id, iterx:iterx });
+        } else if(allow_y && im_allowed){
+          r.send("update_pos", { new_pos:new_pos , id:id, itery:itery });
+        }
+
+        if (allow_y) {
+          ++curr_sub_y;
+              
+          if(curr_sub_y == price_subrounds) { //when we reach the last price subround, start a new subgame
+            if(id == keeper) r.send("set_payoffs", { curr_subperiods:curr_subperiods, id:id });
+            sub_pay[0][curr_subperiods - 1] = payoff(0).toFixed(3);
+            sub_pay[1][curr_subperiods - 1] = payoff(1).toFixed(3);
+
+            allow_x = 1;
+            allow_y = 0;
+
+            if(id == keeper) r.send("update_subsetting", { allow_x:allow_x , allow_y:allow_y, curr_sub_y:curr_sub_y });
+            
+          }
+          
+          if(curr_sub_y == 2){
+            sub_pay[0].shift();
+            sub_pay[1].shift();
+          } 
+        }
+
+        if(id == keeper) r.send("new_subperiod", { curr_subperiods:curr_subperiods });
+
+        //discrete time turn based
+        pick_order = pick_order.reverse();
+        im_allowed = (numerical_id == pick_order[0]);
+        console.log("allowed= " + im_allowed);
+
+        if(curr_subperiods == subperiods){ //when we go through all subperiods, it's time for a new period
+          sub_pay[0][curr_subperiods - 1] = payoff(0).toFixed(3);
+          sub_pay[1][curr_subperiods - 1] = payoff(1).toFixed(3);
+          if(id == keeper) r.send("new_period", { current_period:current_period });
+        }  
+
+        if(id == keeper){
+          r.send("update_subsetting", { allow_x:allow_x , allow_y:allow_y, curr_sub_y:curr_sub_y });
+          r.send("set_payoffs", { curr_subperiods:curr_subperiods, id:id });
+        }
+      }
       }
 
     

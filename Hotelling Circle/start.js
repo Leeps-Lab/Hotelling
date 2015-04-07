@@ -172,7 +172,7 @@ function update_plot() {
     var i = get_index_by_id(id);
 
     get_players();
-
+    /*
     var tmp_col = '#C7C7C7';
 
     if (game_type == "continuous") {
@@ -237,41 +237,60 @@ function update_plot() {
         market_b = get_market_bounds(id);
         //console.log(market_b);
     }
-
+    */
     options.xaxis.ticks = intersects;
-    var c1cx = $("#1").attr("cx"),
-        c1cy = $("#1").attr("cy"),
-        theta = network.players[get_index_by_id(id)].theta,
-        distance = Math.sqrt((c1cx - 225) * (c1cx - 225) + (c1cy - 225) * (c1cy - 225));
+    for (var i = 0; i < network.players.length; ++i) {
+
+        var player = network.players[i];
+        console.log(player);
+        var theta = player.theta;
+        
+        var whichCircle = i+1;
+
+        //This is just 22.5 degrees in radians, and is a constant
+        var angleDiff = 0.392699082;
+
+        var c1cx = Number($("#" + whichCircle).attr("cx")),
+            c1cy = Number($("#" + whichCircle).attr("cy")),
+            distance = Math.sqrt((c1cx - 225) * (c1cx - 225) + (c1cy - 225) * (c1cy - 225));
 
 
-    var endX = (distance * Math.cos(theta + 45)) + c1cx;
-    var endY = (distance * (-(Math.sin(theta + 45)))) + c1cy;
+        var endX = (distance/3 * Math.cos(theta + 3 * Math.PI/4)) + c1cx;
+        var endY = (distance/3 * ((Math.sin(theta + Math.PI/4)))) + c1cy;
 
-    var svg = d3.select("#actionSpace");
+        console.log("endX = " + endX);
+        console.log("endY = " + endY);
 
-    $("#firstProjection").remove();
-    var hoverLine = svg.append("line")
-        .attr("id", "firstProjection")
-        .attr("x1", c1cx)
-        .attr("y1", c1cy)
-        .attr("x2", endX)
-        .attr("y2", endY)
-        .attr("stroke-width", 2)
-        .attr("stroke", col);
 
-    endX = (distance * Math.cos(theta - 45)) + c1cx;
-    endY = (distance * (-(Math.sin(theta - 45)))) + c1cy;
+        var svg = d3.select("#actionSpace");
 
-    $("#secondProjection").remove();
-    var hoverLine = svg.append("line")
-        .attr("id", "secondProjection")
-        .attr("x1", c1cx)
-        .attr("y1", c1cy)
-        .attr("x2", endX)
-        .attr("y2", endY)
-        .attr("stroke-width", 2)
-        .attr("stroke", col);
+        var idStr = whichCircle + "firstProjection";
+        console.log("id String" + idStr)
+        $("#" + idStr).remove();
+        var hoverLine = svg.append("line")
+            .attr("id", idStr)
+            .attr("x1", c1cx)
+            .attr("y1", c1cy)
+            .attr("x2", endX)
+            .attr("y2", endY)
+            .attr("stroke-width", 2)
+            .attr("stroke", col);
+
+        endX = (distance/3 * (Math.cos(theta + Math.PI/4))) + c1cx;
+        endY = (distance/3 * ((Math.sin(theta + Math.PI/4)))) + c1cy;
+
+        idStr = whichCircle + "secondProjection";
+        $("#" + idStr).remove();
+        console.log("id String" + idStr)
+        var hoverLine = svg.append("line")
+            .attr("id", idStr)
+            .attr("x1", c1cx)
+            .attr("y1", c1cy)
+            .attr("x2", endX)
+            .attr("y2", endY)
+            .attr("stroke-width", 2)
+            .attr("stroke", col);
+    }
 
 }
 
@@ -1018,14 +1037,19 @@ $(function() {
         var dY = 225 - relY;
         var dX = relX - 225;
         var theta = Math.atan2(dY, dX);
-
+        var loc_theta = 0;
+        if (theta < 1) {
+            loc_theta = (theta / -Math.PI);
+        } else {
+            loc_theta = (theta / Math.PI);
+        }
         console.log("angle = " + theta);
 
         if (game_type == "stage") {
-            if (allow_x) new_loc = theta;
+            if (allow_x) new_loc = loc_theta;
             else if (allow_y) new_pos = (distance - innerRadius) / 200;
         } else {
-            new_loc = theta;
+            new_loc = loc_theta;
             new_pos = distance / 200;
         }
 
@@ -1471,7 +1495,14 @@ $(function() {
     });
     r.recv("update_theta", function(msg) {
         if (msg.Value.theta !== null) {
-            network.players[msg.Value.id].theta = Number(msg.Value.theta);
+
+            var id = msg.Value.id;
+
+            var num = id.match(/\d+/)[0];
+            console.log("Circle " + num);
+            var index = get_index_by_id(msg.Value.id);
+
+            network.players[index].theta = Number(msg.Value.theta);
         }
     });
 
@@ -1536,7 +1567,6 @@ $(function() {
 
             $("#" + num).attr("cy", msg.Value.y_pos);
             $("#" + num).attr("cx", msg.Value.x_pos);
-            $("#" + num).attr("fill", col);
         }
     });
 
@@ -1761,7 +1791,9 @@ $(function() {
             player.loc = 0;
             player.price = 0;
             player.payoff = 0;
+
             player.theta = 0;
+
             player.bound_lo = 0;
             player.bound_hi = 0;
             player.id = in_group[i];
