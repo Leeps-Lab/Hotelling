@@ -242,52 +242,66 @@ function update_plot() {
     for (var i = 0; i < network.players.length; ++i) {
 
         var player = network.players[i];
-        console.log(player);
+
         var theta = player.theta;
+
+        var degrees = theta * (180/Math.PI);
+        if (degrees < 0) {
+            degrees = 180 + (180 + degrees);
+        }
+        //console.log("degrees: " + degrees);
         
+
+
+        theta = degrees * (Math.PI/180);
+        console.log("theta =" + theta);
+        
+        //first attempt at starting from center
+        var ex = 225 + (200 * Math.cos(theta + Math.PI/4));
+        var ey = 225 - (200 * Math.sin(theta + Math.PI/4));
+
+        console.log("x = " + ex + " y = " + ey);
         var whichCircle = i+1;
 
         //This is just 22.5 degrees in radians, and is a constant
         var angleDiff = 0.392699082;
 
         var c1cx = Number($("#" + whichCircle).attr("cx")),
-            c1cy = Number($("#" + whichCircle).attr("cy")),
-            distance = Math.sqrt((c1cx - 225) * (c1cx - 225) + (c1cy - 225) * (c1cy - 225));
+            c1cy = Number($("#" + whichCircle).attr("cy"));
+
+        if (c1cx == 225 || c1cy == 235) return;
 
 
-        var endX = (distance/3 * Math.cos(theta + 3 * Math.PI/4)) + c1cx;
-        var endY = (distance/3 * ((Math.sin(theta + Math.PI/4)))) + c1cy;
-
-        console.log("endX = " + endX);
-        console.log("endY = " + endY);
-
+        var ex = (225 + (200 * Math.cos(theta + Math.PI/4)));
+        var ey = (225 - (200 * Math.sin(theta + Math.PI/4)));
 
         var svg = d3.select("#actionSpace");
 
         var idStr = whichCircle + "firstProjection";
-        console.log("id String" + idStr)
+
         $("#" + idStr).remove();
-        var hoverLine = svg.append("line")
+        var firstLine = svg.append("line")
             .attr("id", idStr)
             .attr("x1", c1cx)
             .attr("y1", c1cy)
-            .attr("x2", endX)
-            .attr("y2", endY)
+            .attr("x2", ex)
+            .attr("y2", ey)
             .attr("stroke-width", 2)
             .attr("stroke", col);
 
-        endX = (distance/3 * (Math.cos(theta + Math.PI/4))) + c1cx;
-        endY = (distance/3 * ((Math.sin(theta + Math.PI/4)))) + c1cy;
+        //first attempt at starting from center
+        ex = 225 + (200 * Math.cos(theta - Math.PI/4));
+        ey = 225 - (200 * Math.sin(theta - Math.PI/4));
 
         idStr = whichCircle + "secondProjection";
         $("#" + idStr).remove();
-        console.log("id String" + idStr)
-        var hoverLine = svg.append("line")
+
+        var secondLine = svg.append("line")
             .attr("id", idStr)
             .attr("x1", c1cx)
             .attr("y1", c1cy)
-            .attr("x2", endX)
-            .attr("y2", endY)
+            .attr("x2", ex)
+            .attr("y2", ey)
             .attr("stroke-width", 2)
             .attr("stroke", col);
     }
@@ -1038,10 +1052,9 @@ $(function() {
         var dX = relX - 225;
         var theta = Math.atan2(dY, dX);
         var loc_theta = 0;
-        if (theta < 1) {
-            loc_theta = (theta / -Math.PI);
-        } else {
-            loc_theta = (theta / Math.PI);
+
+        if (theta < 0) {
+            theta = Math.PI + (Math.PI + theta);
         }
         console.log("angle = " + theta);
 
@@ -1138,7 +1151,7 @@ $(function() {
 
     //time keeping 1s interval function
     function tick() {
-        console.log(network.players);
+
         if (waiting) return;
 
         if (time <= 1) {
@@ -1496,10 +1509,6 @@ $(function() {
     r.recv("update_theta", function(msg) {
         if (msg.Value.theta !== null) {
 
-            var id = msg.Value.id;
-
-            var num = id.match(/\d+/)[0];
-            console.log("Circle " + num);
             var index = get_index_by_id(msg.Value.id);
 
             network.players[index].theta = Number(msg.Value.theta);
@@ -1558,7 +1567,6 @@ $(function() {
             var id = msg.Value.id;
 
             var num = id.match(/\d+/)[0];
-            console.log("Circle " + num);
             var index = get_index_by_id(msg.Value.id);
 
 
