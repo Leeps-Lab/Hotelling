@@ -172,6 +172,7 @@ function update_plot() {
     var i = get_index_by_id(id);
 
     get_players();
+
     /*
     var tmp_col = '#C7C7C7';
 
@@ -238,30 +239,35 @@ function update_plot() {
         //console.log(market_b);
     }
     */
-    options.xaxis.ticks = intersects;
+
     for (var i = 0; i < network.players.length; ++i) {
 
         var player = network.players[i];
 
+        var thiscolor = player.color;
+
+        if (id == player.id) {
+            thiscolor = "#0066FF";
+        }
+
         var theta = player.theta;
+
+
 
         var degrees = theta * (180/Math.PI);
         if (degrees < 0) {
             degrees = 180 + (180 + degrees);
         }
-        //console.log("degrees: " + degrees);
-        
-
 
         theta = degrees * (Math.PI/180);
-        console.log("theta =" + theta);
+
         
         //first attempt at starting from center
         var ex = 225 + (200 * Math.cos(theta + Math.PI/4));
         var ey = 225 - (200 * Math.sin(theta + Math.PI/4));
 
-        console.log("x = " + ex + " y = " + ey);
-        var whichCircle = i+1;
+
+        var whichCircle = get_subject_num_by_id(network.players[i].id);
 
         //This is just 22.5 degrees in radians, and is a constant
         var angleDiff = 0.392699082;
@@ -269,7 +275,8 @@ function update_plot() {
         var c1cx = Number($("#" + whichCircle).attr("cx")),
             c1cy = Number($("#" + whichCircle).attr("cy"));
 
-        if (c1cx == 225 || c1cy == 235) return;
+        //if this player hasn't moved yet, lets skip them
+        if (c1cx == 225 || c1cy == 235) continue;
 
 
         var ex = (225 + (200 * Math.cos(theta + Math.PI/4)));
@@ -279,6 +286,7 @@ function update_plot() {
 
         var idStr = whichCircle + "firstProjection";
 
+
         $("#" + idStr).remove();
         var firstLine = svg.append("line")
             .attr("id", idStr)
@@ -287,7 +295,7 @@ function update_plot() {
             .attr("x2", ex)
             .attr("y2", ey)
             .attr("stroke-width", 2)
-            .attr("stroke", col);
+            .attr("stroke", thiscolor);
 
         //first attempt at starting from center
         ex = 225 + (200 * Math.cos(theta - Math.PI/4));
@@ -303,7 +311,7 @@ function update_plot() {
             .attr("x2", ex)
             .attr("y2", ey)
             .attr("stroke-width", 2)
-            .attr("stroke", col);
+            .attr("stroke", thiscolor);
     }
 
 }
@@ -885,6 +893,12 @@ function get_index_by_id(key) {
     return res;
 }
 
+
+//This takes the subject ID string and does a regex lookup to determine which subject number they are
+function get_subject_num_by_id(key) {
+    return key.match(/\d+/)[0];
+}
+
 function get_players() {
     //if(waiting) return;
     if (id == keeper) {
@@ -1039,7 +1053,7 @@ $(function() {
         var relX = e.pageX - parentOffset.left;
         var relY = e.pageY - parentOffset.top;
 
-        console.log("x: " + relX + ", y: " + relY);
+        //console.log("x: " + relX + ", y: " + relY);
 
         var distance;
         distance = Math.sqrt((relX - 225) * (relX - 225) + (relY - 225) * (relY - 225));
@@ -1051,20 +1065,23 @@ $(function() {
         var dY = 225 - relY;
         var dX = relX - 225;
         var theta = Math.atan2(dY, dX);
-        var loc_theta = 0;
 
         if (theta < 0) {
             theta = Math.PI + (Math.PI + theta);
         }
-        console.log("angle = " + theta);
+
 
         if (game_type == "stage") {
-            if (allow_x) new_loc = loc_theta;
-            else if (allow_y) new_pos = (distance - innerRadius) / 200;
+            if (allow_x) new_loc = theta/(2*Math.PI);
+            else if (allow_y) new_pos = (distance - innerRadius) / 150;
         } else {
-            new_loc = loc_theta;
-            new_pos = distance / 200;
+            new_loc = theta/(2*Math.PI);
+            new_pos = (distance - innerRadius) / 150;
         }
+
+        console.log("new_loc = " + new_loc );
+        console.log("new_pos = " + new_pos );
+        console.log("angle   = " + theta);
 
         if (new_pos > 1) new_pos = 1;
         if (new_pos < 0) new_pos = 0;
@@ -1512,6 +1529,7 @@ $(function() {
             var index = get_index_by_id(msg.Value.id);
 
             network.players[index].theta = Number(msg.Value.theta);
+            network.players[index].loc = Number(msg.Value.theta/(2*Math.PI));
         }
     });
 
@@ -1548,6 +1566,8 @@ $(function() {
     });
     r.recv("update_circle_x", function(msg) {
         if (msg.Value.x_pos !== null) {
+            network.players[get_index_by_id(msg.Value.id)].loc = Number(msg.Value.new_loc);
+
             var index = get_index_by_id(msg.Value.id);
 
             player_xy[index].x_pos = msg.Value.x_pos;
@@ -1567,6 +1587,7 @@ $(function() {
             var id = msg.Value.id;
 
             var num = id.match(/\d+/)[0];
+
             var index = get_index_by_id(msg.Value.id);
 
 
@@ -1602,7 +1623,6 @@ $(function() {
     });
 
     r.recv("update_subsetting", function(msg) {
-        console.log(msg);
         if (msg.Value.allow_x !== null) allow_x = msg.Value.allow_x;
         if (msg.Value.allow_y !== null) allow_y = msg.Value.allow_y;
         if (msg.Value.curr_sub_y !== null) curr_sub_y = msg.Value.curr_sub_y;
@@ -1771,6 +1791,7 @@ $(function() {
 
     r.finish_sync(function() {
         id = r.username;
+        console.log("my id = " + id);
         group_num = r.group;
 
         //find all players in our group
@@ -1788,6 +1809,7 @@ $(function() {
         setInterval(log_data, 10);
         setInterval(update_plot2, 120);
         setInterval(update_plot, 60);
+
         var svg = d3.select("#actionSpace");
 
 
@@ -1813,17 +1835,25 @@ $(function() {
             player.color = colors[i];
             network.players.push(player);
 
-            var player = {};
-            player.x_pos = 0;
-            player.y_pos = 0;
-            player.color = colors[i];
+            var playerz = {};
+            playerz.x_pos = 0;
+            playerz.y_pos = 0;
+            playerz.color = colors[i];
             player_xy.push(player);
 
             var num = in_group[i].match(/\d+/)[0];
+            console.log("comparing my id: " + id + " with this id: " + player.id);
+            
+            var thiscolor = colors[i];
+
+            if (id == player.id) {
+                thiscolor = "#0066FF";
+            }
+
             svg.append("circle")
                 .attr("id", num)
                 .attr("class", "playerCircle")
-                .attr("fill", colors[i])
+                .attr("fill", thiscolor)
                 .attr("cx", 225)
                 .attr("cy", 225 + player_cy)
                 .attr("r", 7);
@@ -1831,6 +1861,7 @@ $(function() {
             player_cy += 10;
         }
 
+        console.log(network.players);
         r.send("config", {});
     });
 })
