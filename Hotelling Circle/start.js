@@ -265,124 +265,126 @@ function updateActionspace() {
 
 }
 function updateCircle() {
+    tmp_a0 = [];
+    tmp_a1 = [];
+
+    //Used to hold the reflections. This is needed because Flot will try to connect
+    //points even if there's a break in the function, so we split up the positive
+    //reflections and the negative ones for both players.
+    //tmp_a0_front = [];
+    //tmp_a0_back = [];
+    //tmp_a1_front = [];
+    //tmp_a1_back = [];
+
+    market_b = [];
+    intersects = [0, mouse[0], 1];
+
     if (debug1) { // display payoff debug options, player "V's"
         //if we're doing linear, use linear v generator, otherwise do quad
         if (linear) {
             if (payoff_mirror) {
-                tmp_a0 = pt_to_circle(a_mirror(0));
-                tmp_a1 = pt_to_circle(a_mirror(1));
+                tmp_a0 = a_mirror(0);
+                tmp_a1 = a_mirror(1);
             } else {
-                tmp_a0 = pt_to_circle(a(0));
-                tmp_a1 = pt_to_circle(a(1));
+                tmp_a0 = a(0);
+                tmp_a1 = a(1);
             }
         } else {
             if (payoff_mirror) {
-                tmp_a0 = pt_to_circle(quad_mirror(0));
-                tmp_a1 = pt_to_circle(quad_mirror(1));
+                tmp_a0 = quad_mirror(0);
+                tmp_a1 = quad_mirror(1);
             } else {
-                tmp_a0 = pt_to_circle(quad(0));
-                tmp_a1 = pt_to_circle(quad(1));
+                tmp_a0 = quad(0);
+                tmp_a1 = quad(1);
             }
         }
     }
-    console.log("tmp_a0: ");
-    console.log(tmp_a0);
-    console.log("tmp_a1: ");
-    console.log(tmp_a1);
-    drawLineForDataSet(tmp_a0);
-    drawLineForDataSet(tmp_a1);
-    for (var i = 0; i < network.players.length; ++i) {
 
-        var player = network.players[i];
+    //console.log("tmp_a0: ");
+    //console.log(tmp_a0);
+    //console.log("tmp_a1: ");
+    //console.log(tmp_a1);
 
-        var thiscolor = player.color;
+    /*
+    if (payoff_mirror) {
 
-        if (id == player.id) {
-            thiscolor = "#0066FF";
-        }
-
-        var theta = player.theta;
-
-
-
-        var degrees = theta * (180/Math.PI);
-        if (degrees < 0) {
-            degrees = 180 + (180 + degrees);
-        }
-
-        theta = degrees * (Math.PI/180);
-
+            generateTmps();
         
-        //first attempt at starting from center
-        var ex = 225 + (200 * Math.cos(theta + Math.PI/4));
-        var ey = 225 - (200 * Math.sin(theta + Math.PI/4));
+            drawLineForDataSet(tmp_a0_back);
 
+            drawLineForDataSet(tmp_a0_front);
 
-        var whichCircle = get_subject_num_by_id(network.players[i].id);
+            drawLineForDataSet(tmp_a1_back);
 
-        //This is just 22.5 degrees in radians, and is a constant
-        var angleDiff = 0.392699082;
+            drawLineForDataSet(tmp_a1_front);
 
-        var c1cx = Number($("#" + whichCircle).attr("cx")),
-            c1cy = Number($("#" + whichCircle).attr("cy"));
-
-        if (c1cx == 225 || c1cy == 235) continue;
-
-
-        var ex = (225 + (200 * Math.cos(theta + Math.PI/4)));
-        var ey = (225 - (200 * Math.sin(theta + Math.PI/4)));
-
-        var svg = d3.select("#actionSpace");
-
-        var idStr = whichCircle + "firstProjection";
-
-
-        $("#" + idStr).remove();
-        var firstLine = svg.append("line")
-            .attr("id", idStr)
-            .attr("x1", c1cx)
-            .attr("y1", c1cy)
-            .attr("x2", ex)
-            .attr("y2", ey)
-            .attr("stroke-width", 2)
-            .attr("stroke", thiscolor);
-
-        //first attempt at starting from center
-        ex = 225 + (200 * Math.cos(theta - Math.PI/4));
-        ey = 225 - (200 * Math.sin(theta - Math.PI/4));
-
-        idStr = whichCircle + "secondProjection";
-        $("#" + idStr).remove();
-
-        var secondLine = svg.append("line")
-            .attr("id", idStr)
-            .attr("x1", c1cx)
-            .attr("y1", c1cy)
-            .attr("x2", ex)
-            .attr("y2", ey)
-            .attr("stroke-width", 2)
-            .attr("stroke", thiscolor);
+    } else {
+        if (tmp_a0.length != 0)
+            drawLineForDataSet(pt_to_circle(tmp_a0)); 
+        if (tmp_a1.length != 0)
+            drawLineForDataSet(pt_to_circle(tmp_a1));
     }
+    */
+       if (tmp_a0.length != 0)
+            drawLineForDataSet(pt_to_circle(tmp_a0)); 
+        if (tmp_a1.length != 0)
+            drawLineForDataSet(pt_to_circle(tmp_a1));
+    
 }
+function drawActionspace() {
+    var svg = d3.select("#actionSpace");
+
+    //appends the circle to block position
+    svg.append("circle")
+            .style("stroke", "gray")
+            .style("fill", "black")
+            .attr("r", 50)
+            .attr("cx", 225)
+            .attr("cy", 225);
+
+    //appends actionSpace
+    svg.append("circle")
+            .attr("id", "actionCircle")
+            .style("stroke", "gray")
+            .style("fill", "white")
+            .attr("r", 200)
+            .attr("cx", 225)
+            .attr("cy", 225);
+}
+function resetSvg() {
+    clearSvg();
+    drawActionspace();
+}
+function clearSvg() {
+    $("#actionSpace").empty();
+}
+
+
 var proj_counter = 0;
 
 function drawLineForDataSet(pts, id) {
-    for (i = 0; i < proj_counter; i++) {
-        $("proj" + proj_counter).remove();
+    for (i = 0; i <= proj_counter; i++) {
+        var selector = "#proj" + i;
+        $(selector).remove();
     }
     var lineFunction = d3.svg.line()
                         .x(function(d) { return d.x; })
                         .y(function(d) { return d.y; })
-                        .interpolate("linear");
+                        .interpolate("basis-open");
+
+    var idStr = "proj" + proj_counter;
 
     var svg = d3.select("#actionSpace");
     var lineGraph = svg.append("path")
-                            .attr("id", "proj" + proj_counter)
+                            .attr("id", idStr)
                             .attr("d", lineFunction(pts))
                             .attr("stroke", "blue")
                             .attr("stroke-width", 2)
                             .attr("fill", "none");
     proj_counter++;
+}
+function generateTmps() {
+
 }
 var date = 0;
 var old_date = 0;
@@ -612,7 +614,7 @@ function a_mirror(index) {
     var l = player.loc * -1;
     var p = player.price;
 
-    for (var x = player.loc; x <= 5; x = x + 0.001) {
+    for (var x = player.loc; x < 2.5; x = x + 0.001) {
         var curr_loc = x;
         var y = p + Math.abs(l + x);
 
@@ -629,7 +631,7 @@ function a_mirror(index) {
         res.push([curr_loc, y]);
     }
 
-    for (var x = player.loc; x >= -5; x = x - 0.001) {
+    for (var x = player.loc; x >= -2.5; x = x - 0.001) {
         var curr_loc = x;
         var y = p + Math.abs(l + x);
 
@@ -674,7 +676,7 @@ function quad_mirror(index) {
     var l = player.loc * -1;
     var p = player.price;
 
-    for (var x = player.loc; x <= 5; x = x + 0.001) {
+    for (var x = player.loc; x < 2.5; x = x + 0.001) {
         var curr_loc = x;
         var y = p + Math.pow(Math.abs(l + x), 2);
 
@@ -692,7 +694,7 @@ function quad_mirror(index) {
         res.push([curr_loc, y]);
     }
 
-    for (var x = player.loc; x >= -5; x = x - 0.001) {
+    for (var x = player.loc; x >= -2.5; x = x - 0.001) {
         var curr_loc = x;
         var y = p + Math.pow(Math.abs(l + x), 2);
 
@@ -993,18 +995,6 @@ function log_data() {
         });
     }
 }
-function map_to_circle_x(new_loc) {
-    console.log("mapping  " + new_loc + " to circle.");
-    var theta = new_loc * 2 * Math.PI;
-
-    //the new circle has radius 175 accounting for overdrawn black circle
-    var scaled_loc = new_loc * (175);
-    var mapped_loc = scaled_loc + 275;
-
-}
-function map_to_circle_y(new_loc) {
-
-}
 
 //x and y are bounded between 0 and 1
 //maps to a point (x, y) on the circle corresponding to this
@@ -1012,17 +1002,17 @@ function map_point_to_circle(point) {
     var x = point[0];
     var y = point[1];
 
-    var rad = 20 + (175 * y);
+    var rad = 50 + (150 * y);
     var theta = x * 2 * Math.PI;
 
 
     var new_x = rad * (Math.cos(-theta)) + 225;
     var new_y = rad * (Math.sin(-theta)) + 225;
 
-    console.log("theta: " + theta);
-    console.log("radius: " + rad);
+    //console.log("theta: " + theta);
+    //console.log("radius: " + rad);
 
-    console.log ("mapped (" + x + ", " + y + ") to (" + new_x + ", " + new_y + " )");
+    //console.log ("mapped (" + x + ", " + y + ") to (" + new_x + ", " + new_y + " )");
 
     return [new_x, new_y, theta];
 }
@@ -1033,7 +1023,7 @@ function pt_to_circle(points) {
         var point = points[i];
         var x = point[0];
         var y = point[1];
-        var rad = 20 + (175 * y);
+        var rad = 50 + (150 * y);
         var theta = x * 2 * Math.PI;
 
         var new_x = rad * (Math.cos(-theta)) + 225;
