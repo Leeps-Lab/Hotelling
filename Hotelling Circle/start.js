@@ -160,6 +160,7 @@ var tmp_a1_front = [];
 var tmp_a1_back = [];
 
 var market_b = [];
+var combined = true;
 
 /*
  * redraws and updates data for plot 1
@@ -168,78 +169,128 @@ function update_plot() {
     if (waiting) return;
 
     sort_players();
-    var tmp = [target_pos];
-    var i = get_index_by_id(id);
 
     get_players();
+    updateCircle();
 
-    /*
-    var tmp_col = '#C7C7C7';
-
-    if (game_type == "continuous") {
-        targ_line = [];
-        my_pos = [
-            [player_pos[i][0], player_pos[i][1]]
-        ];
-    } else if (game_type != "continuous") {
-        var axis = "";
-        if (allow_x && !allow_y) axis = "x";
-        else if (!allow_x && allow_y) axis = "y";
-
-        tmp_col = '#B20000';
-        targ_line = gen_targ_line(axis); //draw axis choosing line if in discrete time
+    if (combined) {
+        updateActionspace();
     }
 
-    tmp_a0 = [];
-    tmp_a1 = [];
+}
+function updateActionspace() {
 
-    //Used to hold the reflections. This is needed because Flot will try to connect
-    //points even if there's a break in the function, so we split up the positive
-    //reflections and the negative ones for both players.
-    tmp_a0_front = [];
-    tmp_a0_back = [];
-    tmp_a1_front = [];
-    tmp_a1_back = [];
+    var tmp = [target_pos];
+        var i = get_index_by_id(id);
+        var tmp_col = '#C7C7C7';
 
-    market_b = [];
-    intersects = [0, mouse[0], 1];
+        if (game_type == "continuous") {
+            targ_line = [];
+            my_pos = [
+                [player_pos[i][0], player_pos[i][1]]
+            ];
+        } else if (game_type != "continuous") {
+            var axis = "";
+            if (allow_x && !allow_y) axis = "x";
+            else if (!allow_x && allow_y) axis = "y";
 
-    var opp_pos = get_opp_pos();
-    //This isn't done for n players -- only players 0 & 1
+            tmp_col = '#B20000';
+            targ_line = gen_targ_line(axis); //draw axis choosing line if in discrete time
+        }
 
+        tmp_a0 = [];
+        tmp_a1 = [];
+
+        //Used to hold the reflections. This is needed because Flot will try to connect
+        //points even if there's a break in the function, so we split up the positive
+        //reflections and the negative ones for both players.
+        tmp_a0_front = [];
+        tmp_a0_back = [];
+        tmp_a1_front = [];
+        tmp_a1_back = [];
+
+        market_b = [];
+        intersects = [0, mouse[0], 1];
+
+        var opp_pos = get_opp_pos();
+        //This isn't done for n players -- only players 0 & 1
+
+        if (debug1) { // display payoff debug options, player "V's"
+            //if we're doing linear, use linear v generator, otherwise do quad
+            if (linear) {
+                if (payoff_mirror) {
+                    tmp_a0 = a_mirror(0);
+                    tmp_a1 = a_mirror(1);
+                } else {
+                    tmp_a0 = a(0);
+                    tmp_a1 = a(1);
+                }
+            } else {
+                if (payoff_mirror) {
+                    tmp_a0 = quad_mirror(0);
+                    tmp_a1 = quad_mirror(1);
+                } else {
+                    tmp_a0 = quad(0);
+                    tmp_a1 = quad(1);
+                }
+            }
+        }
+
+        if (debug2) { //market intersection lines
+            intersects = find_intersect_pts();
+            intersects[num_of_players + 1] = mouse[0];
+            options.xaxis.ticks = intersects;
+        }
+
+        if (debug3) { //payoff area shading
+            market_b = get_market_bounds(id);
+            //console.log(market_b);
+        }
+        options.xaxis.ticks = intersects;
+        plot = $.plot("#placeholder", [
+            { data: opp_pos[0], /*hoverable: false,*/ color: player_pos[0][2], points:{ show: true, radius: 3, fill: true, fillColor:player_pos[0][2] }},
+            { data: opp_pos[1], color: player_pos[1][2], points:{ show: true, radius: 3, fill: true, fillColor:player_pos[1][2] }},
+            { data: targ_line, color: '#000000', lines:{ show: true, fill: false }},
+            { data: tmp, color: tmp_col, points:{ show: true, radius: 3, fill: true, fillColor:tmp_col }},
+            { data: tmp_a0, hoverable: false, color: player_color(network.players[0].id), lines:{ show: true }},
+            { data: tmp_a0_front, hoverable: false, color: player_color(network.players[0].id), lines:{ show: true }},
+            { data: tmp_a0_back, hoverable: false, color: player_color(network.players[0].id), lines:{ show: true }},
+            { data: tmp_a1, color: player_color(network.players[1].id), lines:{ show: true }},
+            { data: tmp_a1_front, hoverable: false, color: player_color(network.players[1].id), lines:{ show: true }},
+            { data: tmp_a1_back, hoverable: false, color: player_color(network.players[1].id), lines:{ show: true }},
+            { data: my_pos, color: '#000000', points:{ show: true, radius: 5, fill: true, fillColor:'#0099FF' }},
+            { data: market_b, color:col, lines:{ show: true, fill: 0.25 }}
+        ], options);
+
+
+}
+function updateCircle() {
     if (debug1) { // display payoff debug options, player "V's"
         //if we're doing linear, use linear v generator, otherwise do quad
         if (linear) {
             if (payoff_mirror) {
-                tmp_a0 = a_mirror(0);
-                tmp_a1 = a_mirror(1);
+                tmp_a0 = pt_to_circle(a_mirror(0));
+                tmp_a1 = pt_to_circle(a_mirror(1));
             } else {
-                tmp_a0 = a(0);
-                tmp_a1 = a(1);
+                tmp_a0 = pt_to_circle(a(0));
+                tmp_a1 = pt_to_circle(a(1));
             }
         } else {
             if (payoff_mirror) {
-                tmp_a0 = quad_mirror(0);
-                tmp_a1 = quad_mirror(1);
+                tmp_a0 = pt_to_circle(quad_mirror(0));
+                tmp_a1 = pt_to_circle(quad_mirror(1));
             } else {
-                tmp_a0 = quad(0);
-                tmp_a1 = quad(1);
+                tmp_a0 = pt_to_circle(quad(0));
+                tmp_a1 = pt_to_circle(quad(1));
             }
         }
     }
-
-    if (debug2) { //market intersection lines
-        intersects = find_intersect_pts();
-        intersects[num_of_players + 1] = mouse[0];
-        options.xaxis.ticks = intersects;
-    }
-
-    if (debug3) { //payoff area shading
-        market_b = get_market_bounds(id);
-        //console.log(market_b);
-    }
-    */
-
+    console.log("tmp_a0: ");
+    console.log(tmp_a0);
+    console.log("tmp_a1: ");
+    console.log(tmp_a1);
+    drawLineForDataSet(tmp_a0);
+    drawLineForDataSet(tmp_a1);
     for (var i = 0; i < network.players.length; ++i) {
 
         var player = network.players[i];
@@ -275,7 +326,6 @@ function update_plot() {
         var c1cx = Number($("#" + whichCircle).attr("cx")),
             c1cy = Number($("#" + whichCircle).attr("cy"));
 
-        //if this player hasn't moved yet, lets skip them
         if (c1cx == 225 || c1cy == 235) continue;
 
 
@@ -313,9 +363,27 @@ function update_plot() {
             .attr("stroke-width", 2)
             .attr("stroke", thiscolor);
     }
-
 }
+var proj_counter = 0;
 
+function drawLineForDataSet(pts, id) {
+    for (i = 0; i < proj_counter; i++) {
+        $("proj" + proj_counter).remove();
+    }
+    var lineFunction = d3.svg.line()
+                        .x(function(d) { return d.x; })
+                        .y(function(d) { return d.y; })
+                        .interpolate("linear");
+
+    var svg = d3.select("#actionSpace");
+    var lineGraph = svg.append("path")
+                            .attr("id", "proj" + proj_counter)
+                            .attr("d", lineFunction(pts))
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", 2)
+                            .attr("fill", "none");
+    proj_counter++;
+}
 var date = 0;
 var old_date = 0;
 
@@ -925,7 +993,57 @@ function log_data() {
         });
     }
 }
+function map_to_circle_x(new_loc) {
+    console.log("mapping  " + new_loc + " to circle.");
+    var theta = new_loc * 2 * Math.PI;
 
+    //the new circle has radius 175 accounting for overdrawn black circle
+    var scaled_loc = new_loc * (175);
+    var mapped_loc = scaled_loc + 275;
+
+}
+function map_to_circle_y(new_loc) {
+
+}
+
+//x and y are bounded between 0 and 1
+//maps to a point (x, y) on the circle corresponding to this
+function map_point_to_circle(point) {
+    var x = point[0];
+    var y = point[1];
+
+    var rad = 20 + (175 * y);
+    var theta = x * 2 * Math.PI;
+
+
+    var new_x = rad * (Math.cos(-theta)) + 225;
+    var new_y = rad * (Math.sin(-theta)) + 225;
+
+    console.log("theta: " + theta);
+    console.log("radius: " + rad);
+
+    console.log ("mapped (" + x + ", " + y + ") to (" + new_x + ", " + new_y + " )");
+
+    return [new_x, new_y, theta];
+}
+
+function pt_to_circle(points) {
+    var new_pts = [];
+    for (var i = 0; i < points.length; i++) {
+        var point = points[i];
+        var x = point[0];
+        var y = point[1];
+        var rad = 20 + (175 * y);
+        var theta = x * 2 * Math.PI;
+
+        var new_x = rad * (Math.cos(-theta)) + 225;
+        var new_y = rad * (Math.sin(-theta)) + 225;
+        var obj = {"x": new_x, "y": new_y};
+
+        new_pts.push(obj);
+    }
+    return new_pts;
+}
 $(function() {
     r = new Redwood();
 
@@ -953,6 +1071,11 @@ $(function() {
         if (new_pos > 1) new_pos = 1;
         if (new_pos < 0) new_pos = 0;
 
+        //var new_circle_pos = map_to_circle_y(new_pos);
+        //var new_circle_loc = map_to_circle_x(new_loc);
+
+        var circle_pt = map_point_to_circle([new_loc, new_pos]);
+
         //iters no longer used..
         var iterx = 0;
         var itery = 0;
@@ -961,23 +1084,35 @@ $(function() {
         if (game_type == "simultaneous" || game_type == "stage") {
             //my_pos = [[new_loc, new_pos]];
         } else if (game_type == "continuous") {
-            if (x_rate === 0) r.send("update_loc", {
-                new_loc: new_loc,
-                id: id,
-                iterx: iterx
-            });
-            if (y_rate === 0) r.send("update_pos", {
-                new_pos: new_pos,
-                id: id,
-                itery: itery
-            });
-
+            if (x_rate === 0) {
+                r.send("update_loc", {
+                    new_loc: new_loc,
+                    id: id,
+                    iterx: iterx
+                });
+            }
+            if (y_rate === 0) {
+                r.send("update_pos", {
+                    new_pos: new_pos,
+                    id: id,
+                    itery: itery
+                });
+            }
             r.send("update_target", {
                 new_loc: new_loc,
                 new_pos: new_pos,
                 id: id
             });
 
+            r.send("update_circle", {
+                x_pos: circle_pt[0],
+                y_pos: circle_pt[1],
+                id: id
+            });
+            r.send("update_theta", {
+                theta: circle_pt[2],
+                id: id
+            });
             sort_players();
             find_intersect_pts();
             var index = get_index_by_id(id);
@@ -1029,6 +1164,7 @@ $(function() {
 
         var distance = 0;
         distance = Math.sqrt((relX - 225) * (relX - 225) + (relY - 225) * (relY - 225));
+
         if (distance > 200) return;
         var svg = d3.select("#actionSpace");
 
