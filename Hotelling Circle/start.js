@@ -1,3 +1,5 @@
+/// <reference path="typings/d3/d3.d.ts"/>
+
 var id = 0; //player id
 var current_period = 0;
 var curr_subperiods = 1;
