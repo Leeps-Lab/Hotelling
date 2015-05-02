@@ -1,5 +1,4 @@
-/// <reference path="typings/d3/d3.d.ts"/>
-
+/// <reference path="typings/jquery/jquery.d.ts"/>
 var id = 0; //player id
 var current_period = 0;
 var curr_subperiods = 1;
@@ -267,70 +266,62 @@ function updateActionspace() {
 
 }
 function updateCircle() {
-    tmp_a0 = [];
-    tmp_a1 = [];
-
-    //Used to hold the reflections. This is needed because Flot will try to connect
-    //points even if there's a break in the function, so we split up the positive
-    //reflections and the negative ones for both players.
-    //tmp_a0_front = [];
-    //tmp_a0_back = [];
-    //tmp_a1_front = [];
-    //tmp_a1_back = [];
-
-    market_b = [];
-    intersects = [0, mouse[0], 1];
-
-    if (debug1) { // display payoff debug options, player "V's"
-        //if we're doing linear, use linear v generator, otherwise do quad
-        if (linear) {
-            if (payoff_mirror) {
-                tmp_a0 = a_mirror(0);
-                tmp_a1 = a_mirror(1);
-            } else {
-                tmp_a0 = a(0);
-                tmp_a1 = a(1);
-            }
-        } else {
-            if (payoff_mirror) {
-                tmp_a0 = quad_mirror(0);
-                tmp_a1 = quad_mirror(1);
-            } else {
-                tmp_a0 = quad(0);
-                tmp_a1 = quad(1);
-            }
+ 
+       buildProjections();
+        
+        for (i = 0; i < network.players.length; i++) {
+            var front = network.players[i].front_projection;
+            var back = network.players[i].back_projection;
+            
+            drawLineForDataSet(front, i, "front");
+            drawLineForDataSet(back, i, "back");
+        }
+    
+}
+function buildProjections() {
+    for (i = 0; i < network.players.length; i++) {
+        var player = network.players[i];
+        player.projection = [];
+        player.front_projection = [];
+        player.back_projection = [];
+        
+         if (linear) {
+                player.front_projection = linear_proj(i, 1);
+                player.back_projection = linear_proj(i, -1);
+        } else if (quad) {
+                player.front_projection = quad_proj(i, 1);
+                player.back_projection = quad_proj(i, -1);
         }
     }
+}
 
-    //console.log("tmp_a0: ");
-    //console.log(tmp_a0);
-    //console.log("tmp_a1: ");
-    //console.log(tmp_a1);
-
-    /*
-    if (payoff_mirror) {
-
-            generateTmps();
-        
-            drawLineForDataSet(tmp_a0_back);
-
-            drawLineForDataSet(tmp_a0_front);
-
-            drawLineForDataSet(tmp_a1_back);
-
-            drawLineForDataSet(tmp_a1_front);
-
+/* returns a set of data for given player that is half way in the direction of flag */
+function linear_proj(index, flag) {
+    var res = [];
+    var player = network.players[index];
+    if (player === null || player === undefined) return res;
+    if (player.loc == 0) return;
+    var l = player.loc * -1;
+    var p = player.price;
+    
+    if (flag == 1) {
+        for (var x = -3; x <= player.loc; x = x + 0.01) {
+            var y = p + Math.abs(l + x);
+            res.push([x, y]);
+        }
     } else {
-        if (tmp_a0.length != 0)
-            drawLineForDataSet(pt_to_circle(tmp_a0)); 
-        if (tmp_a1.length != 0)
-            drawLineForDataSet(pt_to_circle(tmp_a1));
+        for (var x = player.loc; x < 3; x = x + 0.01) {
+            var y = p + Math.abs(l + x);
+            res.push([x, y]);
+        }
     }
-    */
-       if (tmp_a0.length != 0)
-            drawLineForDataSet(pt_to_circle(tmp_a0)); 
-        if (tmp_a1.length != 0)
-            drawLineForDataSet(pt_to_circle(tmp_a1));
+   res = pt_to_circle(res);
+   console.log(res);
+
+    return res;
+}
+/* returns a set of data for given player that is half way in the direction of flag */
+function quad_proj(index, flag) {
     
 }
 function drawActionspace() {
@@ -364,17 +355,17 @@ function clearSvg() {
 
 var proj_counter = 0;
 
-function drawLineForDataSet(pts, id) {
-    for (i = 0; i <= proj_counter; i++) {
-        var selector = "#proj" + i;
-        $(selector).remove();
-    }
+function drawLineForDataSet(pts, id, dir) {
+    if (pts == null) return;
+    var selector = "#proj" + id + dir;
+    $(selector).remove();
+    
     var lineFunction = d3.svg.line()
                         .x(function(d) { return d.x; })
                         .y(function(d) { return d.y; })
                         .interpolate("basis-open");
 
-    var idStr = "proj" + proj_counter;
+    var idStr = "proj" + id + dir;
 
     var svg = d3.select("#actionSpace");
     var lineGraph = svg.append("path")
@@ -385,9 +376,7 @@ function drawLineForDataSet(pts, id) {
                             .attr("fill", "none");
     proj_counter++;
 }
-function generateTmps() {
 
-}
 var date = 0;
 var old_date = 0;
 
@@ -1018,20 +1007,34 @@ function map_point_to_circle(point) {
 
     return [new_x, new_y, theta];
 }
-
+function point_to_circle(point) {
+    var x = point[0];
+    var y = point[1];
+    
+    var rad = 50 + (150 * y);
+    var theta = x * 2 * Math.PI;
+    
+    
+    var new_x = rad * (Math.cos(-theta)) + 225;
+    var new_y = rad * (Math.sin(-theta)) + 225;
+    return {"x" : new_x, "y" : new_y};
+}
 function pt_to_circle(points) {
     var new_pts = [];
     for (var i = 0; i < points.length; i++) {
         var point = points[i];
-        var x = point[0];
-        var y = point[1];
-        var rad = 50 + (150 * y);
-        var theta = x * 2 * Math.PI;
-
-        var new_x = rad * (Math.cos(-theta)) + 225;
-        var new_y = rad * (Math.sin(-theta)) + 225;
-        var obj = {"x": new_x, "y": new_y};
-
+        var obj = point_to_circle(point);
+        
+        var checkx = obj["x"];
+        var checky = obj["y"];
+        
+        var relX = Math.pow(checkx-225, 2);
+        var relY = Math.pow(checky-225, 2);
+        
+        var distance = Math.sqrt(relX + relY);
+   
+         if ( distance >= 200) continue;
+       // console.log(obj);
         new_pts.push(obj);
     }
     return new_pts;
@@ -1961,6 +1964,11 @@ $(function() {
             player.target = [0, 0];
             player.group = group_num;
             player.color = colors[i];
+
+            player.projection = [];
+            player.front_projection = [];
+            player.back_projection = [];
+            
             network.players.push(player);
 
             var playerz = {};
