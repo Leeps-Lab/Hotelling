@@ -761,13 +761,9 @@ function validate_players() {
 
                     if (p1.price > p2.price + t * Math.abs(p1.loc - p2.loc)) {
                         tmp[i].valid = 0;
-
-                        //update player's new market bounds
-                        var new_lo_bound = 0;
-                        var new_hi_bound = 0;
-
-                        network.players[i].bound_lo = new_lo_bound;
-                        network.players[i].bound_hi = new_hi_bound;
+                        
+                        network.players[i].bound_lo = 0;
+                        network.players[i].bound_hi = 0;
                     }
                 } else if (quadratic) {
                     var intersection = (Math.pow(p1.loc, 2) - Math.pow(p2.loc, 2) + p1.price - p2.price) / (2 * Math.abs(p1.loc - p2.loc));
@@ -820,14 +816,12 @@ function find_intersect_pts() {
 
         for (i = 0; i < tmp.length - 1; ++i) {
             var intersect1 = (t * (tmp[i + 1].loc + tmp[i].loc) + (tmp[i + 1].price - tmp[i].price)) / (2 * t);
+            
             res.push(intersect1);
-
+            
             if (payoff_mirror) {
-                //incorrect
-                var intersect2 = (t * (tmp[i + 1].loc + tmp[i].loc + 1) + (tmp[i + 1].price - tmp[i].price)) / (2 * t);
-                var intersect3 = (t * (tmp[i + 1].loc + 1 + tmp[i].loc) + (tmp[i + 1].price - tmp[i].price)) / (2 * t);
+                var intersect2 = (t * (tmp[i + 1].loc + tmp[i].loc+1) - (tmp[i + 1].price - tmp[i].price)) / (2 * t);
                 res.push(intersect2);
-                res.push(intersect3);
             }
         }
 
@@ -889,7 +883,9 @@ function find_intersect_pts() {
     }
 
     res.push(1);
-    //console.log("intersections between valid players at: " + res);
+   for (i = 0; i < res.length; i++) {
+       console.log("intersection at " + res[i]);
+   }
     var new_lo_bound;
     var new_hi_bound;
     var index;
@@ -1303,6 +1299,7 @@ $(function() {
 
     //time keeping 1s interval function
     function tick() {
+        console.log(network.players);
 
         if (waiting) return;
 
