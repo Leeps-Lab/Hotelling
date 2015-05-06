@@ -310,13 +310,17 @@ function linear_proj(index, flag) {
             res.push([x, y]);
         }
     } else {
+
         for (var x = player.loc; x < 3; x = x + 0.001) {
+
             var y = p + Math.abs(l + x);
             res.push([x, y]);
         }
     }
    res = pt_to_circle(res);
+
    
+
 
     return res;
 }
