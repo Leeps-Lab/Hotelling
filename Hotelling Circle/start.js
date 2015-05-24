@@ -884,7 +884,7 @@ function find_intersect_pts() {
 
     res.push(1);
    for (i = 0; i < res.length; i++) {
-       console.log("intersection at " + res[i]);
+       //console.log("intersection at " + res[i]);
    }
     var new_lo_bound;
     var new_hi_bound;
