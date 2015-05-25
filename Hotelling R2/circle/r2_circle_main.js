@@ -1062,22 +1062,40 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
             new_lo_bound = res[i];
             new_hi_bound = res[i + 1];
-            new_mid_lo = res[i + 2];
-            new_mid_hi = res[i + 3];
-
             index = get_index_by_id(tmp[i].id);
+            if (tmp[i].valid) {
+                if (res.length >= 4) {
+                    new_mid_lo = res[i + 2];
+                    new_mid_hi = res[i + 3];
 
-            if (i == 0) {
-                //this player will have two payoff areas, broken in the middle by the next players
-                //area
-                network.players[index].bound_lo = new_lo_bound;
-                network.players[index].bound_mid_lo = new_hi_bound;
 
-                network.players[index].bound_mid_hi = new_mid_lo;
-                network.players[index].bound_hi = new_mid_hi;
+                    if (i == 0) {
+                        //this player will have two payoff areas, broken in the middle by the next players
+                        //area
+                        network.players[index].bound_lo = new_lo_bound;
+                        network.players[index].bound_mid_lo = new_hi_bound;
+
+                        network.players[index].bound_mid_hi = new_mid_lo;
+                        network.players[index].bound_hi = new_mid_hi;
+                    } else {
+                        network.players[index].bound_lo = new_lo_bound;
+                        network.players[index].bound_hi = new_hi_bound;
+
+                        //this player has a only one continuous payoff area
+                        network.players[index].bound_mid_hi = -1;
+                        network.players[index].bound_mid_lo = -1;
+                    }
+                } else {
+                    network.players[index].bound_lo = new_lo_bound;
+                    network.players[index].bound_hi = new_hi_bound;
+
+                    //this player has a only one continuous payoff area
+                    network.players[index].bound_mid_hi = -1;
+                    network.players[index].bound_mid_lo = -1;
+                }
             } else {
-                network.players[index].bound_lo = new_lo_bound;
-                network.players[index].bound_hi = new_hi_bound;
+                network.players[index].bound_lo = 0;
+                network.players[index].bound_hi = 0;
 
                 //this player has a only one continuous payoff area
                 network.players[index].bound_mid_hi = -1;
