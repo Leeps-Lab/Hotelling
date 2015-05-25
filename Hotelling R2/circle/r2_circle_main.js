@@ -487,13 +487,55 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         for (i = 0; i < network.players.length; i++) {
             var front = network.players[i].front_projection;
             var back = network.players[i].back_projection;
-            
+            var playerId = network.players[i].id;
 
 
-            drawLineForDataSet(front, i, "front");
-            drawLineForDataSet(back, i, "back");
+            drawLineForDataSet(front, playerId, "front");
+            drawLineForDataSet(back, playerId, "back");
         }
 
+    }
+
+    function drawLineForDataSet(pts, pid, dir) {
+        var color = getColorFromId(pid);
+
+        if (pts == null) return;
+
+        var lineFunction = d3.svg.line()
+            .x(function(d) {
+                return d.x;
+            })
+            .y(function(d) {
+                return d.y;
+            })
+            .interpolate("basis-open");
+
+        var idStr = "proj" + pid + dir;
+        var selector = "#proj" + pid + dir;
+
+        var svg = d3.select("#actionSpace");
+
+        //if this projection has been drawn, simply update the data
+        if ($(selector).exists()) {
+            svg.select(selector)
+                .attr("d", lineFunction(pts));
+
+        } else {
+            var lineGraph = svg.append("path")
+                .attr("id", idStr)
+                .attr("d", lineFunction(pts))
+                .attr("stroke", color)
+                .attr("stroke-width", 2)
+                .attr("fill", "none");
+        }
+    }
+    function getColorFromId(id) {
+        for (var i = 0; i < network.players.length; i++) {
+            if (network.players[i].id == id) {
+                return network.players[i].color;
+            }
+        }
+        return null;
     }
 
     function buildProjections() {
@@ -591,37 +633,6 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
     jQuery.fn.exists = function(){return this.length>0;}
 
-    function drawLineForDataSet(pts, iter, dir) {
-        if (pts == null) return;
-
-        var lineFunction = d3.svg.line()
-            .x(function(d) {
-                return d.x;
-            })
-            .y(function(d) {
-                return d.y;
-            })
-            .interpolate("basis-open");
-
-        var idStr = "proj" + iter + dir;
-        var selector = "#proj" + iter + dir;
-
-        var svg = d3.select("#actionSpace");
-
-        //if this projection has been drawn, simply update the data
-        if ($(selector).exists()) {
-            svg.select(selector)
-                .attr("d", lineFunction(pts));
-
-        } else {
-            var lineGraph = svg.append("path")
-                .attr("id", idStr)
-                .attr("d", lineFunction(pts))
-                .attr("stroke", "teal")
-                .attr("stroke-width", 2)
-                .attr("fill", "none");
-        }
-    }
 
     var date = 0;
     var old_date = 0;
@@ -946,7 +957,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             for (i = 0; i < tmp.length - 1; ++i) {
                 var intersect1 = (t * (tmp[i + 1].loc + tmp[i].loc) + (tmp[i + 1].price - tmp[i].price)) / (2 * t);
 
-                res.push(intersect1);
+                //res.push(intersect1);
 
                 if (payoff_mirror) {
                     var intersect2 = (t * (tmp[i + 1].loc + tmp[i].loc + 1) - (tmp[i + 1].price - tmp[i].price)) / (2 * t);
@@ -954,9 +965,21 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                     console.log("intersect 2 = " + intersect2);
                     console.log("intersect 3 = " + intersect3);
                     if (intersect2 > 1) {
-                        res.push(intersect3);
+                        if (intersect3 < intersect1) {
+                            res.push(intersect3);
+                            res.push(intersect1);
+                        } else {
+                            res.push(intersect1);
+                            res.push(intersect3);
+                        }
                     } else {
-                        res.push(intersect2);
+                        if (intersect2 < intersect1) {
+                            res.push(intersect2);
+                            res.push(intersect1);
+                        } else {
+                            res.push(intersect1);
+                            res.push(intersect2);
+                        }
                     }
                     
 
@@ -1021,10 +1044,14 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         }
 
         res.push(1);
+        console.log("results array looks like");
+        console.log(res);
+
         for (i = 0; i < res.length; i++) {
             //console.log("intersection at " + res[i]);
         }
         var new_lo_bound;
+
         var new_hi_bound;
         var index;
 
@@ -1032,12 +1059,31 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         /*now ever subject clicking recalculates the new market bounds for everyone, not just the syncronizer (keeper) - lines 456 and 467*/
         //if(id == keeper){
         for (i = 0; i < tmp.length; ++i) {
+
             new_lo_bound = res[i];
             new_hi_bound = res[i + 1];
+            new_mid_lo = res[i + 2];
+            new_mid_hi = res[i + 3];
+
             index = get_index_by_id(tmp[i].id);
 
-            network.players[index].bound_lo = new_lo_bound;
-            network.players[index].bound_hi = new_hi_bound;
+            if (i == 0) {
+                //this player will have two payoff areas, broken in the middle by the next players
+                //area
+                network.players[index].bound_lo = new_lo_bound;
+                network.players[index].bound_mid_lo = new_hi_bound;
+
+                network.players[index].bound_mid_hi = new_mid_lo;
+                network.players[index].bound_hi = new_mid_hi;
+            } else {
+                network.players[index].bound_lo = new_lo_bound;
+                network.players[index].bound_hi = new_hi_bound;
+
+                //this player has a only one continuous payoff area
+                network.players[index].bound_mid_hi = -1;
+                network.players[index].bound_mid_lo = -1;
+            }
+
 
             //line below did not exist before the fix..
             rs.send("update_bounds", {
@@ -1056,7 +1102,19 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
      * payoff = market_share * price
      */
     function payoff(index) {
-        var market_share = Math.abs(network.players[index].bound_hi - network.players[index].bound_lo) * scalar_x;
+        var player = network.players[index];
+        var bound_lo = player.bound_lo;
+        var bound_hi = player.bound_hi;
+
+        var bound_mid_lo = player.bound_mid_lo;
+        var bound_mid_hi = player.bound_mid_hi;
+
+
+        if (bound_mid_hi == -1 && bound_mid_lo == -1) {
+            var market_share = Math.abs(bound_hi - bound_lo) * scalar_x;
+        } else {
+            var market_share = (Math.abs(bound_mid_lo - bound_lo) + Math.abs(bound_hi - bound_mid_hi)) * scalar_x;
+        }
 
         return market_share * (network.players[index].price * scalar_y);
     }
@@ -1536,15 +1594,24 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             player.loc = 0;
             player.price = 0;
             player.payoff = 0;
+
             player.bound_lo = 0;
             player.bound_hi = 0;
+            //these are used for circle marketplace, since there can be new intersections
+            player.bound_mid_lo = 0;
+            player.bound_mid_hi = 0;
+
             player.id = in_group[i];
             player.valid = 1;
             player.iterx = 0;
             player.itery = 0;
             player.target = [0, 0];
             player.group = group_num;
+            console.log("my id=" + id + " looking at " + player.id);
+
             player.color = colors[i];
+
+            console.log("player: " + player.id + " has color: " + player.color);
             network.players.push(player);
 
             var playerz = {};
@@ -1909,7 +1976,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 })
             }
 
-            //update_plot();
+            update_plot();
         });
 
         //plot 1 on hover event handler for drawing crosshairs
