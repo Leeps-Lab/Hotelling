@@ -77,6 +77,12 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
     var innerRadius = 50;
     var player_xy = [];
 
+    var logging = true;
+
+    function dev_log(string) {
+        if (logging) console.log(string);
+    }
+
     /*
      * returns color associated with a player
      */
@@ -131,24 +137,61 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         var res = [];
         for (var i in network.players) {
             if (network.players[i].id == key) {
-                res.push(network.players[i].bound_lo);
-                res.push(network.players[i].bound_hi);
-                res.push(network.players[i].price);
+                
+                var player = network.players[i];
+
+                var bound_mid_lo = player.bound_mid_lo;
+                var bound_mid_hi = player.bound_mid_hi;
+
+                var bound_lo = player.bound_lo;
+                var bound_hi = player.bound_hi;
+
+                var price = player.price;
+
+
+                if (bound_mid_hi == -1 || bound_mid_lo == -1) {
+                    var out = [];
+                    //1 continuous payoff area
+                    out.push([bound_lo, null]);
+                    out.push([bound_lo, 0]);
+                    out.push([bound_lo, price]);
+
+                    out.push([bound_hi, price]);
+                    out.push([bound_hi, 0]);
+                    out.push([bound_hi, null]);
+                    res.push(out);
+
+                    //empty data set so we can just plot it the same way
+                    //this just allows flot to use res[0] and res[1] 
+                    //for plotting different areas
+                    res.push([]);
+                } else {
+                    var out = [];
+                    //2 noncontinuous payoff areas
+                    out.push([bound_lo, null]);
+                    out.push([bound_lo, 0]);
+                    out.push([bound_lo, price]);
+
+                    out.push([bound_mid_lo, price]);
+                    out.push([bound_mid_lo, 0]);
+                    out.push([bound_mid_lo, null]);
+                    res.push(out);
+                    //2nd area
+                    out = [];
+                    out.push([bound_mid_hi, null]);
+                    out.push([bound_mid_hi, 0]);
+                    out.push([bound_mid_hi, price]);
+
+                    out.push([bound_hi, price]);
+                    out.push([bound_hi, 0]);
+                    out.push([bound_hi, null]);
+                    res.push(out);
+                }
             }
         }
 
-        var out = [];
-        out.push([res[0], null]);
 
-        out.push([res[0], 0]);
-        out.push([res[0], res[2]]);
-
-
-        out.push([res[1], res[2]]);
-        out.push([res[1], 0]);
-        out.push([res[1], null]);
-
-        return out;
+        return res;
     }
 
     var tmp_a0 = [];
@@ -469,9 +512,16 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 fillColor: '#0099FF'
             }
         }, {
-            data: market_b,
+            data: market_b[0],
             color: col,
             lines: {
+                show: true,
+                fill: 0.25
+            }
+        }, {
+            data: market_b[1],
+            color: col,
+            lines : {
                 show: true,
                 fill: 0.25
             }
@@ -884,26 +934,41 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 //for every player excluding yourself compare price
                 if (i != j) {
                     if (linear) {
+                        
                         //new system for circle determines validity based on where intersects occur
+                        var intersect1 = (t * (p2.loc + p1.loc) + (p2.price - p1.price)) / (2 * t);
                         var intersect2 = (t * (p2.loc + p1.loc + 1) - (p2.price - p1.price)) / (2 * t);
                         var intersect3 = (t * (p2.loc + p1.loc - 1) + (p1.price - p2.price)) / (2 * t);
-                        console.log("vp intersect 2 = " + intersect2);
-                        console.log("vp intersect 3 = " + intersect3);
 
                         if (p1.price > p2.price + t * Math.abs(p1.loc - p2.loc)) {
-
                             tmp[i].valid = 0;
 
-                            //update player's new market bounds
-                            var new_lo_bound = 0;
-                            var new_hi_bound = 0;
+                            network.players[i].bound_lo = 0;
+                            network.players[i].bound_hi = 0;
+                            network.players[i].bound_mid_hi = 0;
+                            network.players[i].bound_mid_lo = 0;
 
-                            network.players[i].bound_lo = new_lo_bound;
-                            network.players[i].bound_hi = new_hi_bound;
+                        } 
 
+                        //mirrored case
+                        if (p1.price > p2.price + t * Math.abs(p1.loc - p2.loc - 1)) {
+                            tmp[i].valid = 0;
 
-
+                            network.players[i].bound_lo = 0;
+                            network.players[i].bound_hi = 0;
+                            network.players[i].bound_mid_hi = 0;
+                            network.players[i].bound_mid_lo = 0;
                         }
+                        //mirrored case 2
+                        if (p1.price > p2.price + t * Math.abs(p1.loc - p2.loc + 1)) {
+                            tmp[i].valid = 0;
+
+                            network.players[i].bound_lo = 0;
+                            network.players[i].bound_hi = 0;
+                            network.players[i].bound_mid_hi = 0;
+                            network.players[i].bound_mid_lo = 0;
+                        }
+
                     } else if (quadratic) {
                         var intersection = (Math.pow(p1.loc, 2) - Math.pow(p2.loc, 2) + p1.price - p2.price) / (2 * Math.abs(p1.loc - p2.loc));
                         intersection = Math.abs(intersection);
@@ -948,8 +1013,6 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         var tmp = validate_players();
         var i;
 
-        // t(lH)+(pH)+t(lL)-(pL)2t
-        // t(lH+lL) + (pH-pL)
 
         //high = [i+1], low = [i]
         if (linear) {
@@ -962,8 +1025,11 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 if (payoff_mirror) {
                     var intersect2 = (t * (tmp[i + 1].loc + tmp[i].loc + 1) - (tmp[i + 1].price - tmp[i].price)) / (2 * t);
                     var intersect3 = (t * (tmp[i + 1].loc + tmp[i].loc - 1) + (tmp[i].price - tmp[i+1].price)) / (2 * t);
-                    console.log("intersect 2 = " + intersect2);
-                    console.log("intersect 3 = " + intersect3);
+                    dev_log("intersect 1 = " + intersect1);
+                    dev_log("intersect 2 = " + intersect2);
+                    dev_log("intersect 3 = " + intersect3);
+
+                    //this makes sure intersections are pushed in the correct order
                     if (intersect2 > 1) {
                         if (intersect3 < intersect1) {
                             res.push(intersect3);
@@ -1044,74 +1110,92 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         }
 
         res.push(1);
-        console.log("results array looks like");
-        console.log(res);
+        dev_log("results array looks like");
+        dev_log(res);
 
         for (i = 0; i < res.length; i++) {
             //console.log("intersection at " + res[i]);
         }
+
         var new_lo_bound;
 
         var new_hi_bound;
         var index;
 
-        /*causing issues of mis-synchronization of market boundaries by not passing over new values*/
-        /*now ever subject clicking recalculates the new market bounds for everyone, not just the syncronizer (keeper) - lines 456 and 467*/
-        //if(id == keeper){
+        //this loop will determine which player has a disjoint payoff area
+        // by determining if the players location is sandwhiched between the two intersection points
+        // which were calculated earlier. If they are not, the flag is set.
+        for (i = 0; i < tmp.length; i++) {
+            
+            index = get_index_by_id(tmp[i].id);
+
+            var player = network.players[index];
+            var player_loc = player.loc;
+            //if there are intersections between 0 and 1
+            if (res.length >= 4) {
+
+                new_lo_bound = res[0];
+                new_mid_lo = res[1];
+                new_mid_hi = res[2];
+                new_hi_bound = res[3];
+
+                if (player_loc > new_mid_lo && player_loc < new_mid_hi) {
+                    player.disjoint_areas = 0;
+                } else {
+                    player.disjoint_areas = 1;
+                }
+
+
+            } else {
+               player.disjoint_areas = 0;
+            }
+        }
+
+
         for (i = 0; i < tmp.length; ++i) {
 
             new_lo_bound = res[i];
             new_hi_bound = res[i + 1];
             index = get_index_by_id(tmp[i].id);
-            if (tmp[i].valid) {
-                if (res.length >= 4) {
-                    new_mid_lo = res[i + 2];
-                    new_mid_hi = res[i + 3];
+
+            if (res.length >= 4) {
+
+                new_lo_bound = res[0];
+                new_mid_lo = res[1];
+                new_mid_hi = res[2];
+                new_hi_bound = res[3];
 
 
-                    if (i == 0) {
-                        //this player will have two payoff areas, broken in the middle by the next players
-                        //area
-                        network.players[index].bound_lo = new_lo_bound;
-                        network.players[index].bound_mid_lo = new_hi_bound;
-
-                        network.players[index].bound_mid_hi = new_mid_lo;
-                        network.players[index].bound_hi = new_mid_hi;
-                    } else {
-                        network.players[index].bound_lo = new_lo_bound;
-                        network.players[index].bound_hi = new_hi_bound;
-
-                        //this player has a only one continuous payoff area
-                        network.players[index].bound_mid_hi = -1;
-                        network.players[index].bound_mid_lo = -1;
-                    }
-                } else {
+                if (tmp[i].disjoint_areas) {
+                    //this player will have two payoff areas, broken in the middle by the next players
+                    //area
                     network.players[index].bound_lo = new_lo_bound;
-                    network.players[index].bound_hi = new_hi_bound;
+                    network.players[index].bound_mid_lo = new_mid_lo;
 
-                    //this player has a only one continuous payoff area
+                    network.players[index].bound_mid_hi = new_mid_hi;
+                    network.players[index].bound_hi = new_hi_bound;
+                } else {
+                    network.players[index].bound_lo = new_mid_lo;
+                    network.players[index].bound_hi = new_mid_hi;
+
+                    //this player has only one continuous payoff area
                     network.players[index].bound_mid_hi = -1;
                     network.players[index].bound_mid_lo = -1;
                 }
             } else {
-                network.players[index].bound_lo = 0;
-                network.players[index].bound_hi = 0;
 
-                //this player has a only one continuous payoff area
-                network.players[index].bound_mid_hi = -1;
-                network.players[index].bound_mid_lo = -1;
+                //this is the case where one player holds the entire area
+                network.players[index].disjoint_areas = 0;
+                
+                network.players[index].bound_lo = new_lo_bound;
+                network.players[index].bound_hi = new_hi_bound;
+
+                //this player has only one continuous payoff area
+                network.players[index].bound_mid_hi = 0;
+                network.players[index].bound_mid_lo = 0;
             }
-
-
-            //line below did not exist before the fix..
-            rs.send("update_bounds", {
-                index: index,
-                new_lo_bound: new_lo_bound,
-                new_hi_bound: new_hi_bound
-            });
+            
         }
-
-        //}
 
         return res;
     }
@@ -1128,7 +1212,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         var bound_mid_hi = player.bound_mid_hi;
 
 
-        if (bound_mid_hi == -1 && bound_mid_lo == -1) {
+        if (bound_mid_hi == -1 || bound_mid_lo == -1) {
             var market_share = Math.abs(bound_hi - bound_lo) * scalar_x;
         } else {
             var market_share = (Math.abs(bound_mid_lo - bound_lo) + Math.abs(bound_hi - bound_mid_hi)) * scalar_x;
@@ -1260,8 +1344,9 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
     //time keeping 1s interval function
     function tick() {
-        console.log("ticking");
-        console.log(network.players);
+        dev_log("ticking");
+        dev_log(network.players);
+
         if (waiting) return;
 
         if (time <= 1) {
@@ -1443,10 +1528,6 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                         allow_y: allow_y,
                         curr_sub_y: curr_sub_y
                     });
-                    rs.send("set_payoffs", {
-                        curr_subperiods: curr_subperiods,
-                        id: id
-                    });
                 }
             }
         }
@@ -1618,6 +1699,11 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             //these are used for circle marketplace, since there can be new intersections
             player.bound_mid_lo = 0;
             player.bound_mid_hi = 0;
+
+            //this is a flag that is set if the payoff areas for the player
+            //are disjoint (ie a player controlls two areas separated in the middle by the other player)
+
+            player.disjoint_areas = 0;
 
             player.id = in_group[i];
             player.valid = 1;
