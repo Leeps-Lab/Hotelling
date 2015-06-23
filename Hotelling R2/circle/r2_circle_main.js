@@ -77,7 +77,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
     var innerRadius = 50;
     var player_xy = [];
 
-    var logging = true;
+    var logging = false;
 
     function dev_log(string) {
         if (logging) console.log(string);
@@ -537,13 +537,83 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         for (i = 0; i < network.players.length; i++) {
             var front = network.players[i].front_projection;
             var back = network.players[i].back_projection;
+
             var playerId = network.players[i].id;
 
 
             drawLineForDataSet(front, playerId, "front");
             drawLineForDataSet(back, playerId, "back");
+            dev_log("rs:" + rs.user_id + " playerid:" + playerId);
+            //This makes sure we only draw payoff shading for ourselves
+            if (rs.user_id == playerId) {
+                drawPayoffShading(network.players[i]);
+            }
         }
+    }
 
+    function drawPayoffShading(player) {
+        var idStr = "shading" + player.id;
+        var selector = "#shading" + player.id;
+        if (!player.valid) {
+            if ($(selector).exists()) {
+                $(selector).remove();
+            }
+            return;
+        }
+        var precision = 0.01;
+        var svg = d3.select("#actionSpace");
+
+
+        var pts = [];
+        if (!player.disjoint_areas) {
+            //this constructs our payoff area rectangle
+            for (var i = player.bound_hi; i >= player.bound_lo; i -= precision) { pts.push([i, player.price]); }
+            pts.push([player.bound_lo, player.price]);
+            pts.push([player.bound_lo, 0]);
+            for (var i = player.bound_lo; i <= player.bound_hi; i += precision) { pts.push([i, 0]); }
+            pts.push([player.bound_hi, 0]);
+            pts.push([player.bound_hi, player.price]);
+        } else {
+            //Since we are drawing on the circle, we can simply draw past 1 and
+            //the radians conversion later will take care of it
+            var new_hi = 1 + player.bound_mid_lo;
+            var new_lo = player.bound_mid_hi;
+
+            pts.push([new_lo, player.price]);
+            pts.push([new_lo, 0]);
+
+            for (var i = new_lo; i <= new_hi; i += precision) { pts.push([i, 0]); }
+            pts.push([new_hi, 0]);
+
+            pts.push([new_hi, player.price]);
+            for (var i = new_hi; i >= new_lo; i -= precision) { pts.push([i, player.price]); }
+
+        }
+        var circle_pts = pt_to_circle(pts);
+        var lineFunction = d3.svg.line()
+            .x(function(d) {
+                return d.x;
+            })
+            .y(function(d) {
+                return d.y;
+            })
+            .interpolate("linear");
+
+
+        dev_log("payoff shading points for player" + player.id);
+        dev_log(pts);
+
+        if ($(selector).exists()) {
+            svg.select(selector)
+                .attr("d", lineFunction(circle_pts));
+        } else {
+            var lineGraph = svg.append("path")
+                .attr("id", idStr)
+                .attr("d", lineFunction(circle_pts))
+                .attr("stroke", color)
+                .attr("stroke-width", 2)
+                .attr("fill", "blue");
+        }
     }
 
     function drawLineForDataSet(pts, pid, dir) {
@@ -566,6 +636,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         var svg = d3.select("#actionSpace");
 
         //if this projection has been drawn, simply update the data
+        //otherwise we have to append the line to the svg
         if ($(selector).exists()) {
             svg.select(selector)
                 .attr("d", lineFunction(pts));
@@ -1648,7 +1719,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
     }
 
     rs.on_load(function() {
-
+        dev_log(rs);
         rs.send("config", {});
 
         id = rs.user_id;
@@ -2475,7 +2546,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         for (var i = 0; i < id.length - 15; ++i) {
             tmp_id += id[i];
         }
-        document.getElementById("subj").innerHTML = "Subject: " + tmp_id;
+        document.getElementById("subj").innerHTML = "Subject: " + rs.user_id;
 
         //remove progress bar for continuous game types
         //if(game_type == "continuous") document.getElementById("prog").style.visibility="hidden";
