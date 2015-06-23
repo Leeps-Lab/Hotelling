@@ -1123,8 +1123,6 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         var index;
 
         //this loop will determine which player has a disjoint payoff area
-        // by determining if the players location is sandwhiched between the two intersection points
-        // which were calculated earlier. If they are not, the flag is set.
         for (i = 0; i < tmp.length; i++) {
             
             index = get_index_by_id(tmp[i].id);
