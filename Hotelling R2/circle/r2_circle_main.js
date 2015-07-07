@@ -217,7 +217,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         sort_players();
 
         get_players();
-        updateCircle();
+        //updateCircle();
 
         if (combined) {
             updateActionspace();
