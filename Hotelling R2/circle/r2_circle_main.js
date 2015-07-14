@@ -77,7 +77,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
     var innerRadius = 50;
     var player_xy = [];
 
-    var logging = false;
+    var logging = true;
 
     function dev_log(string) {
         if (logging) console.log(string);
@@ -224,9 +224,10 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         }
 
     }
-        /*
-         * payoff debug "V" generating function
-         */
+
+    /*
+     * payoff debug "V" generating function
+     */
     function a_single(index) {
         var res = [];
         var player = network.players[index];
@@ -423,109 +424,113 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             if (payoff_mirror) {
                 //market_b_2 = get_market_bounds2(id);
             }
-            //console.log(market_b);
+            
         }
         options.xaxis.ticks = intersects;
-        plot = $.plot("#placeholder", [{
-            data: opp_pos[0],
-            /*hoverable: false,*/
-            color: player_pos[0][2],
-            points: {
-                show: true,
-                radius: 3,
-                fill: true,
-                fillColor: player_pos[0][2]
-            }
-        }, {
-            data: opp_pos[1],
-            color: player_pos[1][2],
-            points: {
-                show: true,
-                radius: 3,
-                fill: true,
-                fillColor: player_pos[1][2]
-            }
-        }, {
-            data: targ_line,
-            color: '#000000',
-            lines: {
-                show: true,
-                fill: false
-            }
-        }, {
-            data: tmp,
-            color: tmp_col,
-            points: {
-                show: true,
-                radius: 3,
-                fill: true,
-                fillColor: tmp_col
-            }
-        }, {
-            data: tmp_a0,
-            hoverable: false,
-            color: player_color(network.players[0].id),
-            lines: {
-                show: true
-            }
-        }, {
-            data: tmp_a0_front,
-            hoverable: false,
-            color: player_color(network.players[0].id),
-            lines: {
-                show: true
-            }
-        }, {
-            data: tmp_a0_back,
-            hoverable: false,
-            color: player_color(network.players[0].id),
-            lines: {
-                show: true
-            }
-        }, {
-            data: tmp_a1,
-            color: player_color(network.players[1].id),
-            lines: {
-                show: true
-            }
-        }, {
-            data: tmp_a1_front,
-            hoverable: false,
-            color: player_color(network.players[1].id),
-            lines: {
-                show: true
-            }
-        }, {
-            data: tmp_a1_back,
-            hoverable: false,
-            color: player_color(network.players[1].id),
-            lines: {
-                show: true
-            }
-        }, {
-            data: my_pos,
-            color: '#000000',
-            points: {
-                show: true,
-                radius: 5,
-                fill: true,
-                fillColor: '#0099FF'
-            }
-        }, {
-            data: market_b[0],
-            color: col,
-            lines: {
-                show: true,
-                fill: 0.25
-            }
-        }, {
-            data: market_b[1],
-            color: col,
-            lines : {
-                show: true,
-                fill: 0.25
-            }
-        }], options);
+        var divs = ["#actionspace1", "#actionspace2", "#actionspace3"];
+        
+        for (var i = 0; i < divs.length; i++) {
+            plot = $.plot(divs[i], [{
+                data: opp_pos[0],
+                /*hoverable: false,*/
+                color: player_pos[0][2],
+                points: {
+                    show: true,
+                    radius: 3,
+                    fill: true,
+                    fillColor: player_pos[0][2]
+                }
+            }, {
+                data: opp_pos[1],
+                color: player_pos[1][2],
+                points: {
+                    show: true,
+                    radius: 3,
+                    fill: true,
+                    fillColor: player_pos[1][2]
+                }
+            }, {
+                data: targ_line,
+                color: '#000000',
+                lines: {
+                    show: true,
+                    fill: false
+                }
+            }, {
+                data: tmp,
+                color: tmp_col,
+                points: {
+                    show: true,
+                    radius: 3,
+                    fill: true,
+                    fillColor: tmp_col
+                }
+            }, {
+                data: tmp_a0,
+                hoverable: false,
+                color: player_color(network.players[0].id),
+                lines: {
+                    show: true
+                }
+            }, {
+                data: tmp_a0_front,
+                hoverable: false,
+                color: player_color(network.players[0].id),
+                lines: {
+                    show: true
+                }
+            }, {
+                data: tmp_a0_back,
+                hoverable: false,
+                color: player_color(network.players[0].id),
+                lines: {
+                    show: true
+                }
+            }, {
+                data: tmp_a1,
+                color: player_color(network.players[1].id),
+                lines: {
+                    show: true
+                }
+            }, {
+                data: tmp_a1_front,
+                hoverable: false,
+                color: player_color(network.players[1].id),
+                lines: {
+                    show: true
+                }
+            }, {
+                data: tmp_a1_back,
+                hoverable: false,
+                color: player_color(network.players[1].id),
+                lines: {
+                    show: true
+                }
+            }, {
+                data: my_pos,
+                color: '#000000',
+                points: {
+                    show: true,
+                    radius: 5,
+                    fill: true,
+                    fillColor: '#0099FF'
+                }
+            }, {
+                data: market_b[0],
+                color: col,
+                lines: {
+                    show: true,
+                    fill: 0.25
+                }
+            }, {
+                data: market_b[1],
+                color: col,
+                lines : {
+                    show: true,
+                    fill: 0.25
+                }
+            }], options);
+        }
 
 
     }
@@ -1096,9 +1101,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 if (payoff_mirror) {
                     var intersect2 = (t * (tmp[i + 1].loc + tmp[i].loc + 1) - (tmp[i + 1].price - tmp[i].price)) / (2 * t);
                     var intersect3 = (t * (tmp[i + 1].loc + tmp[i].loc - 1) + (tmp[i].price - tmp[i+1].price)) / (2 * t);
-                    dev_log("intersect 1 = " + intersect1);
-                    dev_log("intersect 2 = " + intersect2);
-                    dev_log("intersect 3 = " + intersect3);
+                    
 
                     //this makes sure intersections are pushed in the correct order
                     if (intersect2 > 1) {
@@ -1181,13 +1184,9 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         }
 
         res.push(1);
-        dev_log("results array looks like");
-        dev_log(res);
+       
 
-        for (i = 0; i < res.length; i++) {
-            //console.log("intersection at " + res[i]);
-        }
-
+    
         var new_lo_bound;
 
         var new_hi_bound;
@@ -1327,15 +1326,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
     }
 
     function get_players() {
-        //if(waiting) return;
-        if (id == keeper) {
-            var value = network.players;
-            rs.send("data_log", {
-                value: value,
-                curr_subperiods: curr_subperiods,
-                silo_num: silo_num
-            });
-        }
+        if(waiting) return;
 
         for (i = 0; i < network.players.length; ++i) {
             player_pos[i] = [network.players[i].loc, network.players[i].price, network.players[i].color];
@@ -1365,11 +1356,6 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
         var new_x = rad * (Math.cos(-theta)) + 225;
         var new_y = rad * (Math.sin(-theta)) + 225;
-
-        //console.log("theta: " + theta);
-        //console.log("radius: " + rad);
-
-        //console.log ("mapped (" + x + ", " + y + ") to (" + new_x + ", " + new_y + " )");
 
         return [new_x, new_y, theta];
     }
@@ -1413,9 +1399,8 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
     //time keeping 1s interval function
     function tick() {
-        dev_log("ticking");
         dev_log(network.players);
-
+        dev_log(rs);
         if (waiting) return;
 
         if (time <= 1) {
@@ -1466,9 +1451,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             $('#progBar').css('width', width + "%");
         }
 
-        if (id == keeper) rs.send("sync_time", {
-            time: time
-        });
+        
 
         //check for end of period in continous time
         if (time >= period_length) {
@@ -1736,8 +1719,6 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         network.players = [];
         if (rs.config.subperiods != 0) game_type = rs.config.discrete_time_type;
 
-        // start player movement refresh function
-        //setInterval(tick, 1000);
 
         $scope.clock = SynchronizedStopWatch.instance()
             .frequency(1).onTick(tick)
@@ -1746,13 +1727,13 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 
             });
 
-        $scope.clock.start();
+        
 
 
         //setInterval(refresh, 300);
         setInterval(log_data, 500);
         setInterval(update_plot2, 400);
-        setInterval(update_plot, 300);
+        setInterval(update_plot, 30);
 
         var svg = d3.select("#actionSpace");
         var player_cy = 0;
@@ -1780,11 +1761,11 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             player.itery = 0;
             player.target = [0, 0];
             player.group = group_num;
-            console.log("my id=" + id + " looking at " + player.id);
+            
 
             player.color = colors[i];
 
-            console.log("player: " + player.id + " has color: " + player.color);
+            
             network.players.push(player);
 
             var playerz = {};
@@ -1810,371 +1791,123 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             player_cy += 10;
         }
 
-        //prevent user input while period syncs up
+        
         $('#myModal').modal({
             backdrop: 'static',
             keyboard: false
         });
-        //$("#myModal").modal('show');
+        
+
+        var divs = ["#actionspace1", "#actionspace2", "#actionspace3"];
+        for (var i = 0; i < divs.length; i++) {
+            
+            //plot click event handler
+            $(divs[i]).bind("plotclick", function(event, pos, item) {
+                if (game_type == "stage") {
+                    if (allow_x) new_loc = pos.x.toFixed(3);
+                    else if (allow_y) new_pos = pos.y.toFixed(3);
+                } else {
+                    new_loc = pos.x.toFixed(3);
+                    new_pos = pos.y.toFixed(3);
+                }
+
+                if (new_loc > 1) new_loc = 1;
+                else if (new_loc < 0) new_loc = 0;
+
+                if (new_pos > 1) new_pos = 1;
+                if (new_pos < 0) new_pos = 0;
 
 
-        //plot 1 on click event handler
-        $("#placeholder").bind("plotclick", function(event, pos, item) {
-            if (game_type == "stage") {
-                if (allow_x) new_loc = pos.x.toFixed(3);
-                else if (allow_y) new_pos = pos.y.toFixed(3);
-            } else {
-                new_loc = pos.x.toFixed(3);
-                new_pos = pos.y.toFixed(3);
-            }
+                //iters no longer used..
+                var iterx = 0;
+                var itery = 0;
+                target_pos = [Number(new_loc), Number(new_pos)];
 
-            if (new_loc > 1) new_loc = 1;
-            else if (new_loc < 0) new_loc = 0;
-
-            if (new_pos > 1) new_pos = 1;
-            if (new_pos < 0) new_pos = 0;
-
-            //var new_circle_pos = map_to_circle_y(new_pos);
-            //var new_circle_loc = map_to_circle_x(new_loc);
-
-            var circle_pt = map_point_to_circle([new_loc, new_pos]);
-
-            //iters no longer used..
-            var iterx = 0;
-            var itery = 0;
-            target_pos = [Number(new_loc), Number(new_pos)];
-
-            if (game_type == "simultaneous" || game_type == "stage") {
-                //my_pos = [[new_loc, new_pos]];
-            } else if (game_type == "continuous") {
-                if (x_rate === 0) {
-                    rs.send("update_loc", {
+                if (game_type == "simultaneous" || game_type == "stage") {
+                    //my_pos = [[new_loc, new_pos]];
+                } else if (game_type == "continuous") {
+                    if (x_rate === 0) {
+                        rs.send("update_loc", {
+                            new_loc: new_loc,
+                            id: id,
+                            iterx: iterx
+                        });
+                        rs.trigger("update_my_loc", {
+                            new_loc: new_loc,
+                            id: id,
+                            iterx: iterx
+                        });
+                    }
+                    if (y_rate === 0) {
+                        rs.send("update_pos", {
+                            new_pos: new_pos,
+                            id: id,
+                            itery: itery
+                        });
+                        rs.trigger("update_my_pos", {
+                            new_pos: new_pos,
+                            id: id,
+                            itery: itery
+                        })
+                    }
+                    rs.send("update_target", {
                         new_loc: new_loc,
-                        id: id,
-                        iterx: iterx
+                        new_pos: new_pos,
+                        id: id
                     });
-                    rs.trigger("update_my_loc", {
+                    rs.trigger("update_my_target", {
                         new_loc: new_loc,
-                        id: id,
-                        iterx: iterx
+                        new_pos: new_pos,
+                        id: id
+                    });
+
+                    sort_players();
+                    find_intersect_pts();
+                    var index = get_index_by_id(id);
+
+                    var pay = payoff(index);
+                    rs.send("update_payoff", {
+                        pay: pay,
+                        index: index
+                    });
+                    rs.trigger("update_my_payoff", {
+                        pay: pay,
+                        index: index
                     });
                 }
-                if (y_rate === 0) {
-                    rs.send("update_pos", {
-                        new_pos: new_pos,
-                        id: id,
-                        itery: itery
-                    });
-                    rs.trigger("update_my_pos", {
-                        new_pos: new_pos,
-                        id: id,
-                        itery: itery
-                    })
-                }
-                rs.send("update_target", {
-                    new_loc: new_loc,
-                    new_pos: new_pos,
-                    id: id
-                });
-                rs.trigger("update_my_target", {
-                    new_loc: new_loc,
-                    new_pos: new_pos,
-                    id: id
-                });
 
-                rs.send("update_circle", {
-                    x_pos: circle_pt[0],
-                    y_pos: circle_pt[1],
-                    id: id
-                });
-                rs.trigger("update_my_circle", {
-                    x_pos: circle_pt[0],
-                    y_pos: circle_pt[1],
-                    id: id
-                });
-                rs.send("update_theta", {
-                    theta: circle_pt[2],
-                    id: id
-                });
-                rs.trigger("update_my_theta", {
-                    theta: circle_pt[2],
-                    id: id
-                });
-                sort_players();
-                find_intersect_pts();
-                var index = get_index_by_id(id);
+                update_plot();
+            });
+        }
+        
 
-                //r.send("update_bounds", { index:index, new_lo_bound:new_lo_bound, new_hi_bound:new_hi_bound } );
+        
+        for (var i = 0; i < divs.length; i++) {
+            //plot 1 on hover event handler for drawing crosshairs
+            $(divs[i]).bind("plothover", function(event, pos, item) {
+                var a, b;
 
-                var pay = payoff(index);
-                rs.send("update_payoff", {
-                    pay: pay,
-                    index: index
-                });
-                rs.trigger("update_my_payoff", {
-                    pay: pay,
-                    index: index
-                });
-            }
-
-            update_plot();
-        });
-
-        //plot 1 on hover event handler for drawing crosshairs
-        $("#actionCircle").on("mousemove", function(e) {
-            var parentOffset = $(this).parent().offset();
-
-            //or $(this).offset(); if you really just want the current element's offset
-
-            var relX = e.pageX - parentOffset.left;
-            var relY = e.pageY - parentOffset.top;
-
-            //this should calculate the angle 
-            var dY = 225 - relY;
-            var dX = relX - 225;
-            var theta = Math.atan2(dY, dX);
-
-            var endX = (Math.cos(theta) * 200) + 225;
-            var endY = (-Math.sin(theta) * 200) + 225;
-
-
-            if (game_type == "stage") {
-                if (allow_x && !allow_y) {
-                    a = relX;
-                } else if (!allow_x && allow_y) {
-                    b = relY;
-                }
-            } else {
-                a = relX;
-                b = relY;
-            }
-
-            mouse = [a, b];
-
-            intersects[num_of_players + 1] = a;
-
-            var distance = 0;
-            distance = Math.sqrt((relX - 225) * (relX - 225) + (relY - 225) * (relY - 225));
-
-            if (distance > 200) return;
-            var svg = d3.select("#actionSpace");
-
-            var color = network.players[get_index_by_id(id)].color;
-
-            $("#hoverLine").remove();
-            var hoverLine = svg.append("line")
-                .attr("id", "hoverLine")
-                .attr("x1", 225)
-                .attr("y1", 225)
-                .attr("x2", endX)
-                .attr("y2", endY)
-                .attr("stroke-width", 2)
-                .attr("stroke", color);
-        });
-
-        $("#actionCircle").on("click", function(e) {
-
-            var parentOffset = $(this).parent().offset();
-
-            //grabs the X,Y of the mouseclick in the div
-            var relX = e.pageX - parentOffset.left;
-            var relY = e.pageY - parentOffset.top;
-
-            //console.log("x: " + relX + ", y: " + relY);
-
-            var distance;
-            distance = Math.sqrt((relX - 225) * (relX - 225) + (relY - 225) * (relY - 225));
-            if (distance > 200) return; //if we're outside of the circle radius, let's stop now.
-            myX = relX;
-            myY = relY;
-
-            //this should calculate the angle 
-            var dY = 225 - relY;
-            var dX = relX - 225;
-            var theta = Math.atan2(dY, dX);
-
-            if (theta < 0) {
-                theta = Math.PI + (Math.PI + theta);
-            }
-
-
-            if (game_type == "stage") {
-                if (allow_x) new_loc = theta / (2 * Math.PI);
-                else if (allow_y) new_pos = (distance - innerRadius) / 150;
-            } else {
-                new_loc = theta / (2 * Math.PI);
-                new_pos = (distance - innerRadius) / 150;
-            }
-
-            console.log("new_loc = " + new_loc);
-            console.log("new_pos = " + new_pos);
-            console.log("angle   = " + theta);
-
-            if (new_pos > 1) new_pos = 1;
-            if (new_pos < 0) new_pos = 0;
-
-            //iters no longer used..
-            var iterx = 0;
-            var itery = 0;
-            target_pos = [Number(new_loc), Number(new_pos)];
-
-            if (game_type == "simultaneous" || game_type == "stage") {
-                my_pos = [
-                    [new_loc, new_pos]
-                ];
-            } else if (game_type == "continuous") {
-                var obj = {
-                    id: id,
-                    new_loc: new_loc,
-                    new_pos: new_pos,
-                    x_pos: myX,
-                    y_pos: myY,
-                    theta: theta,
-                    iterx: iterx,
-                    itery: itery,
-                    x_rate: x_rate,
-                    y_rate: y_rate
-                }
-                rs.send("update_setting", obj);
-                rs.trigger("update_my_setting", obj);
-
-                if (x_rate === 0 && y_rate === 0) {
-                    rs.send("update_loc", {
-                        new_loc: new_loc,
-                        id: id,
-                        iterx: iterx
-                    });
-                    rs.trigger("update_my_loc", {
-                        new_loc: new_loc,
-                        id: id,
-                        iterx: iterx
-                    });
-
-                    rs.send("update_pos", {
-                        new_pos: new_pos,
-                        id: id,
-                        itery: itery
-                    });
-                    rs.trigger("update_my_pos", {
-                        new_pos: new_pos,
-                        id: id,
-                        itery: itery
-                    });
-
-                    rs.send("update_circle", {
-                        x_pos: myX,
-                        y_pos: myY,
-                        id: id
-                    });
-                    rs.trigger("update_my_circle", {
-                        x_pos: myX,
-                        y_pos: myY,
-                        id: id
-                    });
-
-                } else if (x_rate === 0) {
-                    rs.send("update_loc", {
-                        new_loc: new_loc,
-                        id: id,
-                        iterx: iterx
-                    });
-                    rs.trigger("update_my_loc", {
-                        new_loc: new_loc,
-                        id: id,
-                        iterx: iterx
-                    });
-
-                    rs.send("update_circle_x", {
-                        x_pos: myX,
-                        id: id
-                    });
-                    rs.trigger("update_my_circle_x", {
-                        x_pos: myX,
-                        id: id
-                    });
-                } else if (y_rate === 0) {
-                    rs.send("update_circle_y", {
-                        y_pos: myY,
-                        id: id
-                    });
-                    rs.trigger("update_my_circle_y", {
-                        y_pos: myY,
-                        id: id
-                    });
-
-                    rs.send("update_pos", {
-                        new_pos: new_pos,
-                        id: id,
-                        itery: itery
-                    });
-                    rs.trigger("update_my_pos", {
-                        new_pos: new_pos,
-                        id: id,
-                        itery: itery
-                    });
-                }
-                rs.send("update_theta", {
-                    theta: theta,
-                    id: id
-                });
-                rs.trigger("update_my_theta", {
-                    theta: theta,
-                    id: id
-                });
-                rs.send("update_target", {
-                    new_loc: new_loc,
-                    new_pos: new_pos,
-                    id: id
-                });
-                rs.trigger("update_my_target", {
-                    new_loc: new_loc,
-                    new_pos: new_pos,
-                    id: id
-                })
-
-                sort_players();
-                find_intersect_pts();
-                var index = get_index_by_id(id);
-
-                //r.send("update_bounds", { index:index, new_lo_bound:new_lo_bound, new_hi_bound:new_hi_bound } );
-
-                var pay = payoff(index);
-                rs.send("update_payoff", {
-                    pay: pay,
-                    index: index
-                });
-                rs.trigger("update_my_payoff", {
-                    pay: pay,
-                    index: index
-                })
-            }
-
-            update_plot();
-        });
-
-        //plot 1 on hover event handler for drawing crosshairs
-        $("#placeholder").bind("plothover", function(event, pos, item) {
-            var a, b;
-
-            if (game_type == "stage") {
-                if (allow_x && !allow_y) {
+                if (game_type == "stage") {
+                    if (allow_x && !allow_y) {
+                        a = pos.x.toFixed(3);
+                    } else if (!allow_x && allow_y) {
+                        b = pos.y.toFixed(3);
+                    }
+                } else {
                     a = pos.x.toFixed(3);
-                } else if (!allow_x && allow_y) {
                     b = pos.y.toFixed(3);
                 }
-            } else {
-                a = pos.x.toFixed(3);
-                b = pos.y.toFixed(3);
-            }
 
-            mouse = [a, b];
+                mouse = [a, b];
 
-            intersects[num_of_players + 1] = a;
+                intersects[num_of_players + 1] = a;
 
-            options.xaxis.ticks = intersects;
-            options.yaxis.ticks = [0, b, 1.5];
-        });
+                options.xaxis.ticks = intersects;
+                options.yaxis.ticks = [0, b, 1.5];
+            });
+        }
 
+        $scope.clock.start();
     });
 
     rs.recv("rdebug", function(uid, msg) {
@@ -2238,14 +1971,14 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
     });
 
     rs.recv("update_payoff", function(uid, msg) {
-        console.log("updating a payoff" + msg.index);
+        
         if (msg.pay !== null) {
             network.players[msg.index].payoff = Number(msg.pay);
         }
     });
 
     rs.on("update_my_payoff", function(msg) {
-        console.log("updating my payoff");
+        
         if (msg.pay !== null) {
             network.players[msg.index].payoff = Number(msg.pay);
         }
@@ -2283,7 +2016,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         }
     });
     rs.on("update_my_loc", function(msg) {
-        console.log("updating my location");
+        
         if (msg.new_loc !== null) {
             network.players[get_index_by_id(msg.id)].loc = Number(msg.new_loc);
             network.players[get_index_by_id(msg.id)].iterx = Number(Math.abs(msg.new_loc - network.players[get_index_by_id(msg.id)].loc) / (0.025 * (x_rate / 0.5))).toFixed(3);
@@ -2301,7 +2034,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
         }
     });
     rs.on("update_my_pos", function(msg) {
-        console.log("updating my price");
+        
         if (msg.new_pos !== null) {
             network.players[get_index_by_id(msg.id)].price = Number(msg.new_pos);
             network.players[get_index_by_id(msg.id)].itery = Number(Math.abs(msg.new_pos - network.players[get_index_by_id(msg.id)].price) / (0.025 * (y_rate / 0.5))).toFixed(3);
@@ -2312,7 +2045,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
 
     rs.recv("update_target", function(uid, msg) {
-        console.log("recieving update target");
+        
         if (msg.id !== null) {
             network.players[get_index_by_id(msg.id)].iterx = Number(Math.abs(msg.new_loc - network.players[get_index_by_id(msg.id)].loc) / (0.025 * (x_rate / 0.5))).toFixed(3);
             network.players[get_index_by_id(msg.id)].itery = Number(Math.abs(msg.new_pos - network.players[get_index_by_id(msg.id)].price) / (0.025 * (y_rate / 0.5))).toFixed(3);
@@ -2326,7 +2059,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
     });
     rs.on("update_my_target", function(msg) {
-        console.log("updating my own target");
+        
         if (msg.id !== null) {
             network.players[get_index_by_id(msg.id)].iterx = Number(Math.abs(msg.new_loc - network.players[get_index_by_id(msg.id)].loc) / (0.025 * (x_rate / 0.5))).toFixed(3);
             network.players[get_index_by_id(msg.id)].itery = Number(Math.abs(msg.new_pos - network.players[get_index_by_id(msg.id)].price) / (0.025 * (y_rate / 0.5))).toFixed(3);
@@ -2358,7 +2091,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
             network.players[index].theta = Number(msg.theta);
             network.players[index].loc = Number(msg.theta / (2 * Math.PI));
-            update_plot();
+            
         }
     });
     rs.recv("update_circle_x", function(uid, msg) {
@@ -2369,7 +2102,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
             player_xy[index].x_pos = msg.x_pos;
             $("#" + index).attr("cx", msg.x_pos);
-            update_plot();
+            
         }
     });
     rs.on("update_my_circle_x", function(msg) {
@@ -2379,7 +2112,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             network.players[index].loc = Number(msg.new_loc);
             player_xy[index].x_pos = msg.x_pos;
             $("#" + index).attr("cx", msg.x_pos);
-            update_plot();
+            
         }
     });
     rs.recv("update_circle_y", function(uid, msg) {
@@ -2387,7 +2120,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             var index = get_index_by_id(msg.id);
             player_xy[index].y_pos = msg.y_pos;
             $("#" + index).attr("cy", msg.y_pos);
-            update_plot();
+            
         }
     });
     rs.recv("update_my_circle_y", function(msg) {
@@ -2395,7 +2128,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             var index = get_index_by_id(id);
             player_xy[index].y_pos = msg.y_pos;
             $("#" + index).attr("cy", msg.y_pos);
-            update_plot();
+            
         }
     });
 
@@ -2410,7 +2143,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
             $("#" + msg.id).attr("cy", msg.y_pos);
             $("#" + msg.id).attr("cx", msg.x_pos);
-            update_plot();
+            
         }
     });
 
@@ -2425,7 +2158,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
 
             $("#" + msg.id).attr("cy", msg.y_pos);
             $("#" + msg.id).attr("cx", msg.x_pos);
-            update_plot();
+            
 
         }
     });
@@ -2447,6 +2180,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                     x_rate: x_rate,
                     y_rate: y_rate
                 }
+        NOT YET IMPLEMENTED
     */
     rs.recv("update_setting", function (uid, msg) {
         if (msg !== null) {
@@ -2459,6 +2193,8 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             }
         }
     });
+
+
     rs.on("update_my_setting", function (msg) {
         if (msg !== null) {
 
@@ -2532,9 +2268,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
             rs.send("sync_net", {
                 tmp: tmp
             });
-            rs.send("sync_time", {
-                time: time
-            });
+            
         }
 
         col = '#0066FF'; //we always want to be blue
@@ -2568,6 +2302,8 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 clickable: true
             },
             yaxis: {
+                show: false,
+                reserveSpace: null,
                 min: 0,
                 max: 1,
                 position: "left",
