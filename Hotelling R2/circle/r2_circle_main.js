@@ -1824,7 +1824,7 @@ Redwood.controller("SubjectCtrl", ["$rootScope", "$scope", "RedwoodSubject", 'Sy
                 target_pos = [Number(new_loc), Number(new_pos)];
 
                 if (game_type == "simultaneous" || game_type == "stage") {
-                    //my_pos = [[new_loc, new_pos]];
+                    my_pos = [[new_loc, new_pos]];
                 } else if (game_type == "continuous") {
                     if (x_rate === 0) {
                         rs.send("update_loc", {

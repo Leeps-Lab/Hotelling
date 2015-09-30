@@ -1,0 +1,9 @@
+period,group,paid,period_length,subperiods,percent_cpsx,percent_cpsy,payoff_debug,t,show_secs_left,discrete_time_type,num_sp_settingy,num_sp_settingx,payoff_func,p2_options,scale_x,scale_y,payoff_debug2,payoff_debug3,payoff_mirror
+1,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+2,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+3,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+4,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+5,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+6,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+7,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1
+8,0,0,75,0,0,0,1,1,0,continuous,1,1,0,all,1,1,1,1,1

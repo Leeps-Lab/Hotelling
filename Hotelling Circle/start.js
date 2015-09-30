@@ -1077,7 +1077,7 @@ $(function() {
         target_pos = [Number(new_loc), Number(new_pos)];
 
         if (game_type == "simultaneous" || game_type == "stage") {
-            //my_pos = [[new_loc, new_pos]];
+            my_pos = [ [new_loc, new_pos] ];
         } else if (game_type == "continuous") {
             if (x_rate === 0) {
                 r.send("update_loc", {
@@ -1112,7 +1112,6 @@ $(function() {
             find_intersect_pts();
             var index = get_index_by_id(id);
 
-            //r.send("update_bounds", { index:index, new_lo_bound:new_lo_bound, new_hi_bound:new_hi_bound } );
 
             var pay = payoff(index);
             r.send("update_payoff", {
