@@ -1,0 +1,45 @@
+#placeholder2 {
+  margin-left: -15px;
+}
+
+#actionCircle {
+  fill: white;
+  stroke: black;
+}
+
+#1 {
+  transition: all .5s;
+}
+
+#2 {
+  transition: all .5s;
+}
+
+.playerCircle {
+  transition:-webkit-transform 0.5s, fill 0.5s;
+}
+
+.playerCircle:hover {
+  fill: steelblue;
+  /*-webkit-transform: scale(1.2, 1.2);*/
+}
+#hoverLine {
+  pointer-events: none;
+}
+
+.actionspace {
+  padding-right: 5px;
+}
+
+#actionspace1 .overlay {
+  background: -webkit-linear-gradient(right,rgba(255,255,255,0),rgba(255,255,255,1)); /*Safari 5.1-6*/
+  background: -o-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,1)); /*Opera 11.1-12*/
+  background: -moz-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,1)); /*Fx 3.6-15*/
+  background: linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,1)); /*Standard*/
+}
+#actionspace3 .overlay {
+  background: -webkit-linear-gradient(left,rgba(255,255,255,0),rgba(255,255,255,1)); /*Safari 5.1-6*/
+  background: -o-linear-gradient(right,rgba(255,255,255,0),rgba(255,255,255,1)); /*Opera 11.1-12*/
+  background: -moz-linear-gradient(right,rgba(255,255,255,0),rgba(255,255,255,1)); /*Fx 3.6-15*/
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1)); /*Standard*/
+}

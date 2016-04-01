@@ -1,0 +1,127 @@
+{% load verbatim %}
+<!DOCTYPE HTML>
+<html ng-app="Redwood">
+  <head>
+		<title>Start</title>
+
+		<script type="text/javascript" src="{{ STATIC_URL }}framework/js/lib/jquery/jquery.min.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}framework/js/lib/bootstrap/bootstrap-3.1.1.min.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}framework/js/lib/angular/angular-1.2.16.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}framework/js/redwoodCore.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}framework/js/redwoodHelpers.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}framework/js/redwoodSubject.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}framework/js/synchronizedStopWatch.js"></script>		
+    
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}framework/js/lib/flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="{{ STATIC_URL}}framework/js/lib/flot/jquery.flot.selection.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}framework/js/lib/d3/d3.js"></script>
+    
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}framework/css/bootstrap-3.1.1.min.css"></link>
+		<script type="text/javascript">
+			{{ js }}
+		</script>
+		<style type="text/css">
+			{{ css }}
+		</style>
+	</head>
+{% verbatim %}
+	<body style="padding-top:60px" ng-controller="SubjectCtrl">
+  <div class='container'>
+		
+		<div class="navbar navbar-fixed-top container">
+        <div class="navbar navbar-default" style="margin-bottom: 0;">
+            <div class="navbar-brand" href="#">Economics Experiment</div>
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a id="subj">User ID: <span>{{$root.user_id}}</span></a>
+                </li>
+            </ul>
+            <div class="navbar-right">
+                <div id="period" class="navbar-text">Period: <span>{{$root.period}}</span></div>
+                <div id="paid" class="navbar-text">Paid: </div>
+                <div id="curr_score" class="navbar-text">Score:</div>
+                <div id="time" class="navbar-text">Time:</div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    
+      <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+      </div>
+    </div>
+  
+  
+
+
+    <div class='row'>
+      <div class='col-md-9'>
+        <div class="progress" id="progress">
+          <div id='progBar' class="progress-bar progress-bar-striped active"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="130" style="width: 0%">
+            
+          </div>
+        </div>
+      </div>
+
+      <div class='col-md-3'>
+        <h4 id = "total_score" style="visibility:hidden">Total Score: </h4>
+      </div>
+    </div>
+
+    <div class='row'>
+      <h3 id="color">Your color</h3>
+      <p id="x_ref"></p>
+      <p id="y_ref"></p> 
+      <p id="x_loc"></p>
+      <p id="test"></p>
+      <h2 id="select" style="color:red"></h2>
+    </div>
+    <div class='row'>
+      <table>
+        <tr>
+          <td>
+            <div id="actionspace1" style="height:400px; width:400px; margin-right:-11px;" class="demo-placeholder actionspace">  </div>
+          </td>
+          <td>
+            <div id="actionspace2" style="height:400px; width:400px;" class="demo-placeholder actionspace">  </div>
+          </td>
+          <td>
+            <div id="actionspace3" style="height:400px; width:400px; margin-left:-11px;" class="demo-placeholder actionspace">  </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class='row'>
+      <div class="col-md-8 col-md-offset-4">
+        <div id="placeholder2" style="height:300px; width:420px" class="demo-placeholder">  </div>
+      </div>
+      
+      
+      <!-- rip circle marketplace 
+      <table>
+        <tr>
+        <td>
+          <div class="demo-container" >
+              <svg width="450" height="450" id="actionSpace">
+                <circle id="actionCircle" cx="225" cy="225" r="200"></circle>
+                <circle cx="225" cy="225" r="50" style="fill:black;"></circle>
+              </svg>
+          </div>
+        </td>
+        <td style="padding-left: 20px"><div class="demo-container" >
+           <div id="placeholder2" style="height:450px; width:450px" class="demo-placeholder">  </div>
+        </div></td>
+        </tr>
+      </table>
+      -->
+      
+    </div>
+  </div>
+</body>
+{% endverbatim %}
+</html>
+
